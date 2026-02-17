@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiProviderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
@@ -54,5 +55,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/user', [PengaturanController::class, 'tambahUser'])->name('tambah-user');
         Route::put('/user/{user}', [PengaturanController::class, 'updateUser'])->name('update-user');
         Route::delete('/user/{user}', [PengaturanController::class, 'hapusUser'])->name('hapus-user');
+    });
+
+    // Route AI Provider (semua user bisa akses)
+    Route::prefix('ai-provider')->name('ai-provider.')->group(function () {
+        Route::get('/', [AiProviderController::class, 'index'])->name('index');
+        Route::post('/{id}/api-key', [AiProviderController::class, 'updateApiKey'])->name('update-api-key');
+        Route::post('/{id}/toggle', [AiProviderController::class, 'toggleAktif'])->name('toggle');
+        Route::post('/{id}/prioritas', [AiProviderController::class, 'updatePrioritas'])->name('update-prioritas');
+        Route::post('/{id}/quota', [AiProviderController::class, 'updateQuota'])->name('update-quota');
+        Route::post('/{id}/reset-quota', [AiProviderController::class, 'resetQuota'])->name('reset-quota');
     });
 });

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AiMemory;
+use App\Models\AiProvider;
 use App\Models\LogChat;
-use App\Services\LayananGroq;
+use App\Services\LayananAI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,11 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return view('dashboard');
+        // Ambil provider yang tersedia untuk user
+        $userId = Auth::id();
+        $providers = AiProvider::getAvailableProviders($userId);
+
+        return view('dashboard', compact('providers'));
     }
 
     /**
@@ -27,6 +32,7 @@ class DashboardController extends Controller
         // Validasi input
         $request->validate([
             'pesan_member' => 'required|string|min:5',
+            'provider_id' => 'nullable|exists:ai_provider,id',
         ], [
             'pesan_member.required' => 'Pesan member wajib diisi',
             'pesan_member.min' => 'Pesan member minimal 5 karakter',
@@ -34,27 +40,29 @@ class DashboardController extends Controller
 
         try {
             $pesanMember = $request->input('pesan_member');
+            $providerId = $request->input('provider_id');
             $userId = Auth::id();
 
-            // Buat instance LayananGroq dengan user context
-            $layananGroq = new LayananGroq($userId);
+            // Buat instance LayananAI dengan user context dan provider pilihan
+            $layananAI = new LayananAI($userId, $providerId);
 
             // Generate jawaban pakai AI
-            $hasil = $layananGroq->generateJawaban($pesanMember);
+            $hasil = $layananAI->generateJawaban($pesanMember);
 
             // Simpan ke log
+            $provider = $layananAI->getProvider();
             $log = LogChat::create([
                 'pesan_member' => $pesanMember,
                 'kategori_terdeteksi' => $hasil['kategori'],
                 'jawaban_formal' => $hasil['formal'],
                 'jawaban_santai' => $hasil['santai'],
                 'jawaban_singkat' => $hasil['singkat'],
-                'provider_digunakan' => 'groq',
+                'provider_digunakan' => $provider ? $provider->nama : 'unknown',
                 'user_id' => $userId,
             ]);
 
             // Simpan ke AI Memory untuk learning
-            $memory = $layananGroq->saveToMemory(
+            $memory = $layananAI->saveToMemory(
                 $pesanMember,
                 $hasil,
                 $userId,
