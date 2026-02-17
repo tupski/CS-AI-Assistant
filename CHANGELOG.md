@@ -5,6 +5,100 @@ Semua perubahan penting pada project CS AI Assistant akan didokumentasikan di fi
 Format berdasarkan [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-02-17
+
+### ✨ Fitur Baru
+
+#### AI Memory & Learning System
+- **Tabel AI Memory**
+  - Tabel baru `ai_memory` untuk menyimpan context learning AI
+  - Setiap generate jawaban otomatis disimpan sebagai memory
+  - Field: pesan_member, kategori_terdeteksi, 3 versi jawaban
+  - Snapshot system_prompt_used, peraturan_used, faq_used (JSON)
+  - Tracking usage_count untuk monitor referensi
+  - Flag is_good_example untuk filter quality
+
+- **AI Belajar dari Memory**
+  - System prompt sekarang include 5 contoh jawaban terbaik dari AI Memory
+  - AI belajar pola dan gaya bahasa dari jawaban sebelumnya
+  - Usage count otomatis increment saat memory digunakan
+  - Memory diurutkan berdasarkan latest untuk freshness
+
+- **AI Belajar dari FAQ**
+  - System prompt include 10 FAQ dari knowledge base
+  - FAQ ditampilkan dengan kategori untuk context
+  - AI bisa reference FAQ saat generate jawaban
+  - Format: Q&A dengan preview 300 karakter
+
+- **Enhanced System Prompt**
+  - Kombinasi: Peraturan + FAQ + AI Memory + Chat History + AI Guidelines
+  - Feedback loop: AI improve dari jawaban yang digenerate
+  - Context-aware: Snapshot peraturan dan FAQ saat generate
+  - Learning over time: Semakin banyak data, semakin smart
+
+#### Development Tools
+- **Laravel Debugbar**
+  - Install Laravel Debugbar untuk development debugging
+  - Package: barryvdh/laravel-debugbar v4.0
+  - Auto-enabled di environment development
+  - Memudahkan debug query, request, response, dll
+
+### 🐛 Bug Fixes
+
+- **Fix Field Label Error**
+  - Migration untuk make field `label` di tabel `pengaturan` nullable
+  - Fix error: "Field 'label' doesn't have a default value"
+  - Sekarang AI Guidelines bisa disimpan tanpa label
+
+- **Fix SSL Certificate Error**
+  - Disable SSL verification di development environment
+  - Fix cURL error 60: SSL certificate problem
+  - Production tetap pakai SSL verification
+  - Solusi untuk Laragon/Windows local development
+
+### 📦 Database Changes
+
+- **Migration: update_pengaturan_table_make_label_nullable**
+  - Alter tabel `pengaturan` field `label` jadi nullable
+  - Backward compatible dengan data existing
+
+- **Migration: buat_tabel_ai_memory**
+  - Tabel baru untuk AI learning system
+  - Index: kategori_terdeteksi, is_good_example, created_at
+  - Foreign key ke users dengan onDelete set null
+  - JSON fields untuk snapshot context
+
+### 🔧 Technical Changes
+
+- **Model: AiMemory**
+  - Model baru dengan fillable semua fields
+  - Cast: peraturan_used, faq_used as array
+  - Scopes: goodExamples(), byKategori(), mostUsed()
+  - Method: incrementUsage() untuk tracking
+
+- **Service: LayananGroq**
+  - Method baru: formatFaq() untuk format FAQ di prompt
+  - Method baru: formatMemory() untuk format AI Memory di prompt
+  - Method baru: saveToMemory() untuk simpan hasil generate
+  - Enhanced buatSystemPrompt() dengan FAQ dan Memory
+  - SSL verification conditional berdasarkan environment
+
+- **Controller: DashboardController**
+  - Auto save ke AI Memory setiap generate jawaban
+  - Return memory_id di response JSON
+  - Default is_good_example = true untuk semua generate
+
+### 📝 Files Modified
+
+- `app/Models/AiMemory.php` (new)
+- `app/Services/LayananGroq.php` (enhanced)
+- `app/Http/Controllers/DashboardController.php` (enhanced)
+- `database/migrations/2026_02_17_175105_update_pengaturan_table_make_label_nullable.php` (new)
+- `database/migrations/2026_02_17_175713_buat_tabel_ai_memory.php` (new)
+- `composer.json` (debugbar added)
+
+---
+
 ## [2.2.0] - 2026-02-17
 
 ### ✨ Fitur Baru
