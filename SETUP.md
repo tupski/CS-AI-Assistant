@@ -90,25 +90,47 @@ Aplikasi akan berjalan di: http://localhost:8000
 
 ## 🔐 Login
 
+### Admin User (Akses Penuh)
+- **Email**: admin@example.com
+- **Password**: admin123
+- **Role**: Admin
+- **Akses**: Dashboard + Pengaturan
+
+### CS User (Akses Terbatas)
 - **Email**: cs@example.com
 - **Password**: password123
+- **Role**: Customer Service
+- **Akses**: Dashboard saja
 
 ⚠️ **PENTING**: Ganti password default setelah login pertama kali!
 
 ## 🧪 Testing
 
-### Test Manual
+### Test Manual - Dashboard
 
-1. Login dengan kredensial di atas
+1. Login dengan salah satu kredensial di atas
 2. Paste contoh chat member di kolom kiri
 3. Klik "Generate Jawaban"
 4. Lihat 3 versi jawaban di kolom kanan
 5. Edit jika perlu, lalu klik "Salin"
 
+### Test Manual - Pengaturan (Admin Only)
+
+1. Login sebagai admin
+2. Klik menu "Pengaturan" di navbar
+3. Tab "Pengaturan API":
+   - Input Groq API Key Anda
+   - Pilih model yang diinginkan
+   - Klik "Simpan Pengaturan API"
+4. Tab "Manajemen User":
+   - Klik "Tambah User" untuk buat user baru
+   - Pilih role yang sesuai (bisa multiple)
+   - Edit atau hapus user yang ada
+
 ### Contoh Chat Member untuk Testing
 
 ```
-Halo min, saya sudah transfer tapi belum dikonfirmasi. 
+Halo min, saya sudah transfer tapi belum dikonfirmasi.
 Orderan saya nomor #12345. Kapan diproses?
 ```
 
@@ -146,10 +168,13 @@ php artisan migrate:fresh --seed
 
 ## 💡 Tips
 
-1. Gunakan Groq model `llama-3.3-70b-versatile` untuk hasil terbaik
-2. Simpan API key dengan aman, jangan commit ke git
-3. Backup database secara berkala
-4. Monitor log di `storage/logs/laravel.log`
+1. **API Key**: Sekarang bisa diatur lewat halaman Pengaturan (tidak perlu edit .env lagi)
+2. **Multi-Role**: User bisa punya lebih dari 1 role sekaligus
+3. **Model AI**: Gunakan `llama-3.3-70b-versatile` untuk hasil terbaik
+4. **Keamanan**: Simpan API key dengan aman, jangan commit ke git
+5. **Backup**: Backup database secara berkala
+6. **Monitoring**: Monitor log di `storage/logs/laravel.log`
+7. **Role Admin**: Hanya admin yang bisa akses halaman Pengaturan
 
 ## 🆘 Butuh Bantuan?
 

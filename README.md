@@ -18,6 +18,18 @@ CS AI Assistant adalah webapp yang dirancang khusus untuk membantu tim Customer 
   - System prompt khusus untuk Customer Service
   - Deteksi kategori otomatis (pembayaran, pengiriman, produk, dll)
 
+- 👥 **Multi-Role System** ⭐ NEW
+  - Role: Admin, Supervisor, Customer Service
+  - Role-based access control
+  - Multiple roles per user
+  - Middleware protection untuk route
+
+- ⚙️ **Halaman Pengaturan** ⭐ NEW
+  - Kelola Groq API Key dari UI (tidak perlu edit .env)
+  - Pilih model AI yang digunakan
+  - User management (tambah, edit, hapus)
+  - Assign multiple roles ke user
+
 - 📝 **Fitur Produktivitas**
   - Copy to clipboard dengan satu klik
   - Edit jawaban sebelum disalin
@@ -34,6 +46,7 @@ CS AI Assistant adalah webapp yang dirancang khusus untuk membantu tim Customer 
   - Responsive design
   - Loading indicators
   - Error handling yang informatif
+  - Role badges di navbar
 
 ## 🛠️ Tech Stack
 
@@ -78,9 +91,6 @@ mysql -u root -p -e "CREATE DATABASE cs_ai_assistant CHARACTER SET utf8mb4 COLLA
 php artisan migrate
 php artisan db:seed
 
-# Tambahkan Groq API Key di .env
-# GROQ_API_KEY=your_api_key_here
-
 # Jalankan server
 php artisan serve
 ```
@@ -89,10 +99,17 @@ Buka browser: http://localhost:8000
 
 ### Login Default
 
+**Admin (Akses Penuh):**
+- **Email**: admin@example.com
+- **Password**: admin123
+
+**CS (Akses Dashboard):**
 - **Email**: cs@example.com
 - **Password**: password123
 
 ⚠️ **Ganti password setelah login pertama kali!**
+
+💡 **Tips**: API Key sekarang bisa diatur lewat halaman Pengaturan (login sebagai admin)
 
 ## 📖 Dokumentasi Lengkap
 
@@ -101,13 +118,28 @@ Buka browser: http://localhost:8000
 
 ## 🎯 Cara Penggunaan
 
-1. Login dengan kredensial CS
+### Dashboard (Semua Role)
+
+1. Login dengan kredensial yang sesuai
 2. Paste chat dari member di kolom kiri
 3. Klik tombol "Generate Jawaban"
 4. Tunggu AI memproses (biasanya 2-5 detik)
 5. Lihat 3 versi jawaban di kolom kanan
 6. Edit jika perlu, lalu klik "Salin"
 7. Paste ke platform chat member
+
+### Pengaturan (Admin Only)
+
+1. Login sebagai admin
+2. Klik menu "Pengaturan" di navbar
+3. **Tab Pengaturan API**:
+   - Input Groq API Key
+   - Pilih model AI
+   - Simpan pengaturan
+4. **Tab Manajemen User**:
+   - Tambah user baru
+   - Assign role (bisa multiple)
+   - Edit atau hapus user
 
 ## 🧪 Testing
 
