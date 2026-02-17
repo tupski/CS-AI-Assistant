@@ -1,79 +1,66 @@
-# CS AI Assistant
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Webapp internal untuk membantu tim Customer Service dalam merespons chat member dengan bantuan AI.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## 📋 Deskripsi
+## About Laravel
 
-CS AI Assistant adalah aplikasi web yang dirancang khusus untuk tim Customer Service. Aplikasi ini memungkinkan CS untuk:
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- Paste chat dari member
-- Generate 3 versi jawaban otomatis menggunakan AI (Formal, Santai, Singkat)
-- Copy jawaban dengan cepat
-- Menyimpan log percakapan ke database untuk analisis
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-## 🛠️ Tech Stack
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-- **Backend**: Laravel 12
-- **Frontend**: Blade Templates, TailwindCSS, AlpineJS
-- **Database**: MySQL
-- **AI Provider**: Groq API
+## Learning Laravel
 
-## ✨ Fitur Utama
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
 
-1. **Autentikasi Sederhana** - Login/logout untuk tim CS
-2. **Dashboard Interaktif** - Interface 2 kolom yang intuitif
-3. **AI-Powered Response** - Generate 3 versi jawaban berbeda
-4. **Quick Copy** - Salin jawaban dengan satu klik
-5. **Edit Before Copy** - Modifikasi jawaban sebelum disalin
-6. **Auto Logging** - Semua interaksi tersimpan otomatis
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-## 📦 Instalasi
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-```bash
-# Clone repository
-git clone <repository-url>
-cd cs-ai-assistant
+## Laravel Sponsors
 
-# Install dependencies
-composer install
-npm install
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-# Setup environment
-cp .env.example .env
-php artisan key:generate
+### Premium Partners
 
-# Setup database
-# Edit .env dengan kredensial database Anda
-php artisan migrate
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[WebReinvent](https://webreinvent.com/)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Jump24](https://jump24.co.uk)**
+- **[Redberry](https://redberry.international/laravel/)**
+- **[Active Logic](https://activelogic.com)**
+- **[byte5](https://byte5.de)**
+- **[OP.GG](https://op.gg)**
 
-# Compile assets
-npm run dev
+## Contributing
 
-# Jalankan server
-php artisan serve
-```
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## ⚙️ Konfigurasi
+## Code of Conduct
 
-Edit file `.env` dan tambahkan:
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-```env
-GROQ_API_KEY=your_groq_api_key_here
-```
+## Security Vulnerabilities
 
-## 🚀 Cara Menggunakan
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-1. Login dengan akun CS
-2. Paste chat member di kolom kiri
-3. Klik "Generate Jawaban"
-4. Pilih versi jawaban yang sesuai (Formal/Santai/Singkat)
-5. Edit jika perlu, lalu klik "Salin"
+## License
 
-## 📝 Lisensi
-
-Internal use only - Tim Customer Service
-
-## 👨‍💻 Developer
-
-Dibuat dengan ❤️ untuk tim CS
-
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
