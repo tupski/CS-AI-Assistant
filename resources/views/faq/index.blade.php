@@ -75,9 +75,13 @@
                     @forelse($faqs as $faq)
                     <tr class="hover:bg-gray-700/50">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            @if($faq->kategori)
+                            @if($faq->kategori && is_object($faq->kategori))
                             <span class="px-3 py-1 rounded-full text-xs font-medium bg-{{ $faq->kategori->warna ?? 'gray' }}-500/20 text-{{ $faq->kategori->warna ?? 'gray' }}-400">
                                 {{ $faq->kategori->icon }} {{ $faq->kategori->nama }}
+                            </span>
+                            @elseif($faq->kategori && is_string($faq->kategori))
+                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
+                                {{ $faq->kategori }}
                             </span>
                             @else
                             <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
