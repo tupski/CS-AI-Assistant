@@ -55,6 +55,14 @@ class DashboardController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
+            // Simpan ke AI Memory untuk learning
+            $memory = $this->layananGroq->saveToMemory(
+                $pesanMember,
+                $hasil,
+                Auth::id(),
+                true // Default semua dianggap good example
+            );
+
             return response()->json([
                 'sukses' => true,
                 'data' => [
@@ -63,6 +71,7 @@ class DashboardController extends Controller
                     'santai' => $hasil['santai'],
                     'singkat' => $hasil['singkat'],
                     'log_id' => $log->id,
+                    'memory_id' => $memory->id,
                 ],
                 'pesan' => 'Jawaban berhasil di-generate!',
             ]);

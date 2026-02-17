@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\AiMemory;
+use App\Models\Faq;
 use App\Models\LogChat;
 use App\Models\Pengaturan;
 use App\Models\Peraturan;
@@ -85,6 +87,17 @@ class LayananGroq
         $peraturans = Peraturan::aktif()->urutan()->get();
         $peraturanText = $this->formatPeraturan($peraturans);
 
+        // Ambil FAQ yang relevan
+        $faqs = Faq::with('kategori')->limit(10)->get();
+        $faqText = $this->formatFaq($faqs);
+
+        // Ambil AI Memory (contoh jawaban terbaik)
+        $memories = AiMemory::goodExamples()
+            ->latest()
+            ->limit(5)
+            ->get();
+        $memoryText = $this->formatMemory($memories);
+
         // Ambil contoh chat dari log (5 terakhir)
         $contohChat = LogChat::with('user')
             ->latest()
@@ -109,6 +122,12 @@ ATURAN PENTING:
 {$guidelinesText}
 PERATURAN & GUIDELINES CS:
 {$peraturanText}
+
+FAQ KNOWLEDGE BASE:
+{$faqText}
+
+CONTOH JAWABAN TERBAIK (AI Memory - pelajari pola dan gaya bahasa):
+{$memoryText}
 
 CONTOH CHAT SEBELUMNYA (untuk referensi gaya bahasa):
 {$contohChatText}
@@ -184,6 +203,54 @@ PROMPT;
     }
 
     /**
+     * Format FAQ untuk system prompt
+     */
+    protected function formatFaq($faqs): string
+    {
+        if ($faqs->isEmpty()) {
+            return "Belum ada FAQ tersedia.";
+        }
+
+        $text = "";
+        foreach ($faqs as $index => $faq) {
+            $num = $index + 1;
+            $kategori = '';
+            if ($faq->kategori && is_object($faq->kategori)) {
+                $kategori = " [{$faq->kategori->nama}]";
+            }
+            $text .= "\nFAQ {$num}{$kategori}:\n";
+            $text .= "Q: {$faq->judul}\n";
+            $text .= "A: " . substr($faq->isi, 0, 300) . "\n";
+        }
+
+        return $text;
+    }
+
+    /**
+     * Format AI Memory untuk system prompt
+     */
+    protected function formatMemory($memories): string
+    {
+        if ($memories->isEmpty()) {
+            return "Belum ada contoh jawaban tersimpan.";
+        }
+
+        $text = "";
+        foreach ($memories as $index => $memory) {
+            $num = $index + 1;
+            $text .= "\nContoh Terbaik {$num} [{$memory->kategori_terdeteksi}]:\n";
+            $text .= "Member: " . substr($memory->pesan_member, 0, 150) . "\n";
+            $text .= "CS (Santai): " . substr($memory->jawaban_santai, 0, 200) . "\n";
+            $text .= "CS (Formal): " . substr($memory->jawaban_formal, 0, 200) . "\n";
+
+            // Increment usage count
+            $memory->incrementUsage();
+        }
+
+        return $text;
+    }
+
+    /**
      * Buat user prompt dengan pesan member
      */
     protected function buatUserPrompt(string $pesanMember): string
@@ -219,6 +286,53 @@ PROMPT;
         }
 
         return $decoded;
+    }
+
+    /**
+     * Simpan hasil generate ke AI Memory
+     */
+    public function saveToMemory(
+        string $pesanMember,
+        array $hasil,
+        ?int $userId = null,
+        bool $isGoodExample = true
+    ): AiMemory {
+        // Ambil peraturan yang digunakan (snapshot)
+        $peraturans = Peraturan::aktif()->urutan()->get();
+        $peraturanSnapshot = $peraturans->map(function ($p) {
+            return [
+                'judul' => $p->judul,
+                'isi' => $p->isi,
+                'tipe' => $p->tipe,
+                'prioritas' => $p->prioritas,
+            ];
+        })->toArray();
+
+        // Ambil FAQ yang relevan (snapshot)
+        $faqs = Faq::with('kategori')->limit(5)->get();
+        $faqSnapshot = $faqs->map(function ($f) {
+            return [
+                'judul' => $f->judul,
+                'isi' => substr($f->isi, 0, 200),
+                'kategori' => $f->kategori && is_object($f->kategori) ? $f->kategori->nama : null,
+            ];
+        })->toArray();
+
+        // Simpan ke database
+        return AiMemory::create([
+            'pesan_member' => $pesanMember,
+            'kategori_terdeteksi' => $hasil['kategori'] ?? null,
+            'jawaban_formal' => $hasil['formal'],
+            'jawaban_santai' => $hasil['santai'],
+            'jawaban_singkat' => $hasil['singkat'],
+            'system_prompt_used' => $this->buatSystemPrompt(),
+            'peraturan_used' => $peraturanSnapshot,
+            'faq_used' => $faqSnapshot,
+            'provider_digunakan' => 'groq',
+            'user_id' => $userId,
+            'is_good_example' => $isGoodExample,
+            'usage_count' => 0,
+        ]);
     }
 }
 
