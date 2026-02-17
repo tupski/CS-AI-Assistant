@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AiMemory;
 use App\Models\LogChat;
 use App\Services\LayananGroq;
 use Illuminate\Http\Request;
@@ -10,13 +11,6 @@ use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    protected LayananGroq $layananGroq;
-
-    public function __construct(LayananGroq $layananGroq)
-    {
-        $this->layananGroq = $layananGroq;
-    }
-
     /**
      * Tampilkan halaman dashboard
      */
@@ -40,9 +34,13 @@ class DashboardController extends Controller
 
         try {
             $pesanMember = $request->input('pesan_member');
+            $userId = Auth::id();
+
+            // Buat instance LayananGroq dengan user context
+            $layananGroq = new LayananGroq($userId);
 
             // Generate jawaban pakai AI
-            $hasil = $this->layananGroq->generateJawaban($pesanMember);
+            $hasil = $layananGroq->generateJawaban($pesanMember);
 
             // Simpan ke log
             $log = LogChat::create([
@@ -52,14 +50,14 @@ class DashboardController extends Controller
                 'jawaban_santai' => $hasil['santai'],
                 'jawaban_singkat' => $hasil['singkat'],
                 'provider_digunakan' => 'groq',
-                'user_id' => Auth::id(),
+                'user_id' => $userId,
             ]);
 
             // Simpan ke AI Memory untuk learning
-            $memory = $this->layananGroq->saveToMemory(
+            $memory = $layananGroq->saveToMemory(
                 $pesanMember,
                 $hasil,
-                Auth::id(),
+                $userId,
                 true // Default semua dianggap good example
             );
 
@@ -106,5 +104,43 @@ class DashboardController extends Controller
             'sukses' => true,
             'data' => $logs,
         ]);
+    }
+
+    /**
+     * Track jawaban yang disalin
+     */
+    public function trackCopy(Request $request)
+    {
+        $request->validate([
+            'memory_id' => 'required|exists:ai_memory,id',
+            'tipe_jawaban' => 'required|in:formal,santai,singkat',
+        ]);
+
+        try {
+            $memory = AiMemory::findOrFail($request->memory_id);
+
+            // Mark sebagai disalin
+            $memory->markAsCopied($request->tipe_jawaban);
+
+            return response()->json([
+                'sukses' => true,
+                'pesan' => 'Jawaban berhasil ditandai sebagai disalin',
+                'data' => [
+                    'copy_count' => $memory->copy_count,
+                    'is_good_example' => $memory->is_good_example,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error track copy', [
+                'error' => $e->getMessage(),
+                'memory_id' => $request->memory_id,
+            ]);
+
+            return response()->json([
+                'sukses' => false,
+                'pesan' => 'Gagal track copy: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -57,6 +57,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke UserPengaturan (settings pribadi user)
+     */
+    public function pengaturan(): HasMany
+    {
+        return $this->hasMany(UserPengaturan::class);
+    }
+
+    /**
+     * Relasi ke AiMemory (memory AI user)
+     */
+    public function aiMemory(): HasMany
+    {
+        return $this->hasMany(AiMemory::class);
+    }
+
+    /**
      * Relasi many-to-many ke Role
      */
     public function roles(): BelongsToMany

@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     // Route Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/generate', [DashboardController::class, 'generateJawaban'])->name('dashboard.generate');
+    Route::post('/dashboard/track-copy', [DashboardController::class, 'trackCopy'])->name('dashboard.track-copy');
     Route::get('/dashboard/riwayat', [DashboardController::class, 'riwayat'])->name('dashboard.riwayat');
 
     // Route FAQ (admin & supervisor)

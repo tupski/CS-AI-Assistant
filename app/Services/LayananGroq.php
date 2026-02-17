@@ -7,6 +7,7 @@ use App\Models\Faq;
 use App\Models\LogChat;
 use App\Models\Pengaturan;
 use App\Models\Peraturan;
+use App\Models\UserPengaturan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -15,13 +16,24 @@ class LayananGroq
     protected string $apiKey;
     protected string $apiUrl;
     protected string $model;
+    protected ?int $userId;
 
-    public function __construct()
+    public function __construct(?int $userId = null)
     {
-        // Ambil dari database dulu, fallback ke config
-        $this->apiKey = Pengaturan::ambil('groq_api_key', config('services.groq.api_key'));
+        $this->userId = $userId;
+
+        // Ambil dari user settings dulu, fallback ke global settings, fallback ke config
+        if ($userId) {
+            $this->apiKey = UserPengaturan::ambil($userId, 'groq_api_key')
+                ?? Pengaturan::ambil('groq_api_key', config('services.groq.api_key'));
+            $this->model = UserPengaturan::ambil($userId, 'groq_model')
+                ?? Pengaturan::ambil('groq_model', config('services.groq.model'));
+        } else {
+            $this->apiKey = Pengaturan::ambil('groq_api_key', config('services.groq.api_key'));
+            $this->model = Pengaturan::ambil('groq_model', config('services.groq.model'));
+        }
+
         $this->apiUrl = config('services.groq.api_url');
-        $this->model = Pengaturan::ambil('groq_model', config('services.groq.model'));
     }
 
     /**
@@ -96,22 +108,39 @@ class LayananGroq
         $faqs = Faq::with('kategori')->limit(10)->get();
         $faqText = $this->formatFaq($faqs);
 
-        // Ambil AI Memory (contoh jawaban terbaik)
-        $memories = AiMemory::goodExamples()
-            ->latest()
-            ->limit(5)
-            ->get();
-        $memoryText = $this->formatMemory($memories);
+        // Ambil AI Memory user sendiri (prioritas tinggi - yang pernah disalin)
+        $userMemories = collect();
+        if ($this->userId) {
+            $userMemories = AiMemory::byUser($this->userId)
+                ->whereNotNull('jawaban_disalin') // Prioritas yang pernah disalin
+                ->orderBy('copy_count', 'desc')
+                ->limit(3)
+                ->get();
+        }
+        $userMemoryText = $this->formatMemory($userMemories, 'User');
 
-        // Ambil contoh chat dari log (5 terakhir)
-        $contohChat = LogChat::with('user')
-            ->latest()
-            ->limit(5)
+        // Ambil AI Memory global (contoh jawaban terbaik dari semua user)
+        $globalMemories = AiMemory::goodExamples()
+            ->mostCopied(3) // Yang paling sering disalin
             ->get();
+        $globalMemoryText = $this->formatMemory($globalMemories, 'Global');
+
+        // Ambil contoh chat dari log user sendiri (5 terakhir)
+        $contohChatQuery = LogChat::with('user')->latest()->limit(5);
+        if ($this->userId) {
+            $contohChatQuery->where('user_id', $this->userId);
+        }
+        $contohChat = $contohChatQuery->get();
         $contohChatText = $this->formatContohChat($contohChat);
 
-        // Ambil AI guidelines dari pengaturan (jika ada)
-        $aiGuidelines = Pengaturan::ambil('ai_guidelines', '');
+        // Ambil AI guidelines - user settings prioritas, fallback ke global
+        $aiGuidelines = '';
+        if ($this->userId) {
+            $aiGuidelines = UserPengaturan::ambil($this->userId, 'ai_guidelines')
+                ?? Pengaturan::ambil('ai_guidelines', '');
+        } else {
+            $aiGuidelines = Pengaturan::ambil('ai_guidelines', '');
+        }
         $guidelinesText = $aiGuidelines ? "\n\nPANDUAN TAMBAHAN:\n{$aiGuidelines}\n" : '';
 
         return <<<PROMPT
@@ -131,8 +160,11 @@ PERATURAN & GUIDELINES CS:
 FAQ KNOWLEDGE BASE:
 {$faqText}
 
-CONTOH JAWABAN TERBAIK (AI Memory - pelajari pola dan gaya bahasa):
-{$memoryText}
+CONTOH JAWABAN TERBAIK ANDA (Memory Pribadi - pelajari dari jawaban yang pernah Anda salin):
+{$userMemoryText}
+
+CONTOH JAWABAN TERBAIK GLOBAL (Memory dari semua CS - pelajari pola terbaik):
+{$globalMemoryText}
 
 CONTOH CHAT SEBELUMNYA (untuk referensi gaya bahasa):
 {$contohChatText}
@@ -234,7 +266,7 @@ PROMPT;
     /**
      * Format AI Memory untuk system prompt
      */
-    protected function formatMemory($memories): string
+    protected function formatMemory($memories, string $label = 'Contoh'): string
     {
         if ($memories->isEmpty()) {
             return "Belum ada contoh jawaban tersimpan.";
@@ -243,10 +275,18 @@ PROMPT;
         $text = "";
         foreach ($memories as $index => $memory) {
             $num = $index + 1;
-            $text .= "\nContoh Terbaik {$num} [{$memory->kategori_terdeteksi}]:\n";
+            $copyInfo = $memory->jawaban_disalin ? " [Disalin: {$memory->jawaban_disalin}, {$memory->copy_count}x]" : "";
+            $text .= "\n{$label} {$num} [{$memory->kategori_terdeteksi}]{$copyInfo}:\n";
             $text .= "Member: " . substr($memory->pesan_member, 0, 150) . "\n";
-            $text .= "CS (Santai): " . substr($memory->jawaban_santai, 0, 200) . "\n";
-            $text .= "CS (Formal): " . substr($memory->jawaban_formal, 0, 200) . "\n";
+
+            // Tampilkan jawaban yang disalin sebagai prioritas
+            if ($memory->jawaban_disalin) {
+                $jawabanKey = 'jawaban_' . $memory->jawaban_disalin;
+                $text .= "CS ({$memory->jawaban_disalin}): " . substr($memory->$jawabanKey, 0, 250) . "\n";
+            } else {
+                $text .= "CS (Santai): " . substr($memory->jawaban_santai, 0, 200) . "\n";
+                $text .= "CS (Formal): " . substr($memory->jawaban_formal, 0, 200) . "\n";
+            }
 
             // Increment usage count
             $memory->incrementUsage();

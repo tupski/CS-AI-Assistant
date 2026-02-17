@@ -21,6 +21,9 @@ class AiMemory extends Model
         'jawaban_formal',
         'jawaban_santai',
         'jawaban_singkat',
+        'jawaban_disalin',
+        'disalin_pada',
+        'copy_count',
         'system_prompt_used',
         'peraturan_used',
         'faq_used',
@@ -38,6 +41,8 @@ class AiMemory extends Model
         'faq_used' => 'array',
         'is_good_example' => 'boolean',
         'usage_count' => 'integer',
+        'copy_count' => 'integer',
+        'disalin_pada' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -80,5 +85,36 @@ class AiMemory extends Model
     public function incrementUsage()
     {
         $this->increment('usage_count');
+    }
+
+    /**
+     * Scope untuk ambil yang paling sering disalin
+     */
+    public function scopeMostCopied($query, $limit = 10)
+    {
+        return $query->whereNotNull('jawaban_disalin')
+            ->orderBy('copy_count', 'desc')
+            ->limit($limit);
+    }
+
+    /**
+     * Scope untuk filter by user
+     */
+    public function scopeByUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Mark jawaban sebagai disalin
+     */
+    public function markAsCopied(string $tipeJawaban)
+    {
+        $this->update([
+            'jawaban_disalin' => $tipeJawaban,
+            'disalin_pada' => now(),
+            'is_good_example' => true, // Auto mark as good example
+        ]);
+        $this->increment('copy_count');
     }
 }

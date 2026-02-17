@@ -242,6 +242,7 @@ function dashboardApp() {
         errorMessage: '',
         showToast: false,
         toastMessage: '',
+        memoryId: null, // Simpan memory ID untuk tracking
 
         init() {
             // Setup CSRF token untuk semua request AJAX
@@ -281,6 +282,7 @@ function dashboardApp() {
                     this.jawabanFormal = data.data.formal;
                     this.jawabanSantai = data.data.santai;
                     this.jawabanSingkat = data.data.singkat;
+                    this.memoryId = data.data.memory_id; // Simpan memory ID
 
                     this.tampilkanToast('Jawaban berhasil di-generate! ✨');
                 } else {
@@ -331,6 +333,11 @@ function dashboardApp() {
                             break;
                     }
 
+                    // Update memory ID jika ada
+                    if (data.data.memory_id) {
+                        this.memoryId = data.data.memory_id;
+                    }
+
                     this.tampilkanToast(`Jawaban ${tipe} berhasil di-regenerate! 🔄`);
                 } else {
                     this.errorMessage = data.pesan || 'Terjadi kesalahan';
@@ -372,9 +379,34 @@ function dashboardApp() {
             try {
                 await navigator.clipboard.writeText(teks);
                 this.tampilkanToast(`Jawaban ${tipe} berhasil disalin! 📋`);
+
+                // Track copy ke database
+                if (this.memoryId) {
+                    this.trackCopy(tipe);
+                }
             } catch (error) {
                 console.error('Error menyalin:', error);
                 this.errorMessage = 'Gagal menyalin teks';
+            }
+        },
+
+        async trackCopy(tipe) {
+            try {
+                await fetch('{{ route("dashboard.track-copy") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({
+                        memory_id: this.memoryId,
+                        tipe_jawaban: tipe
+                    })
+                });
+                // Silent tracking, tidak perlu notifikasi
+            } catch (error) {
+                console.error('Error tracking copy:', error);
+                // Silent fail, tidak ganggu user experience
             }
         },
 
