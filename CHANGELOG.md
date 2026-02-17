@@ -124,18 +124,79 @@ database/
 
 ---
 
+## [2.0.0] - 2026-02-17
+
+### ✨ Fitur Baru - Major Update
+
+#### Sistem Multi-Role
+- Tabel `roles` untuk manajemen role (Admin, Supervisor, CS)
+- Tabel pivot `role_user` untuk relasi many-to-many
+- Helper methods di User model: `punyaRole()`, `isAdmin()`, `isSupervisor()`, `isCs()`
+- Middleware `CekRole` untuk proteksi route berdasarkan role
+- Badge role di navbar untuk identifikasi user
+
+#### Halaman Pengaturan (Admin Only)
+- Tab Pengaturan API:
+  - Input Groq API Key (disimpan di database)
+  - Pilihan model AI (Llama 3.3, Llama 3.1, Mixtral)
+  - Validasi dan update real-time
+- Tab Manajemen User:
+  - Tabel daftar user dengan role
+  - Tambah user baru dengan multiple roles
+  - Edit user (nama, email, password, roles)
+  - Hapus user (dengan proteksi tidak bisa hapus diri sendiri)
+  - Modal form dengan AlpineJS
+
+#### Database Settings
+- Tabel `pengaturan` untuk menyimpan konfigurasi aplikasi
+- Model `Pengaturan` dengan helper methods `ambil()` dan `atur()`
+- API key dan model sekarang disimpan di database (bukan hardcode di .env)
+- LayananGroq otomatis ambil config dari database dengan fallback ke .env
+
+#### Seeder Updates
+- `RoleSeeder` - Seed 3 role default (admin, supervisor, cs)
+- `PengaturanSeeder` - Seed pengaturan API default
+- `UserSeeder` - Buat 2 user default:
+  - Admin (admin@example.com / admin123)
+  - CS Staff (cs@example.com / password123)
+
+#### Navigation & UI
+- Menu navigasi di navbar (Dashboard, Pengaturan)
+- Active state pada menu
+- Role badge di user info navbar
+- Responsive design untuk mobile
+
+### 🔒 Keamanan
+- Middleware role-based access control
+- Validasi input untuk semua form
+- Password hashing untuk user baru
+- CSRF protection di semua form
+- Unique constraint untuk email dan role assignment
+
+### 🏗️ Arsitektur
+- Migration untuk roles, role_user, dan pengaturan
+- Model dengan relasi yang proper
+- Controller terpisah untuk pengaturan
+- Middleware alias untuk kemudahan penggunaan
+- Service layer yang fleksibel (database-first, fallback ke config)
+
+### 📝 Breaking Changes
+- User sekarang harus punya minimal 1 role
+- API key sekarang prioritas dari database, bukan .env
+- Route `/pengaturan/*` hanya bisa diakses admin
+
+---
+
 ## Versi Mendatang
 
-### [1.1.0] - Planned
+### [2.1.0] - Planned
 
-- [ ] Halaman riwayat chat lengkap
-- [ ] Filter dan search di riwayat
+- [ ] Halaman riwayat chat lengkap dengan filter
 - [ ] Export log ke Excel/CSV
-- [ ] Dashboard analytics
-- [ ] Multi-user management
-- [ ] Role & permission system
+- [ ] Dashboard analytics untuk supervisor
+- [ ] Supervisor bisa lihat performa CS
 
-### [1.2.0] - Planned
+### [2.2.0] - Planned
 
 - [ ] FAQ management CRUD
 - [ ] Template jawaban custom

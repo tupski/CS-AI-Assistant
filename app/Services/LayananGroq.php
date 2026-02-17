@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Pengaturan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -13,14 +14,15 @@ class LayananGroq
 
     public function __construct()
     {
-        $this->apiKey = config('services.groq.api_key');
+        // Ambil dari database dulu, fallback ke config
+        $this->apiKey = Pengaturan::ambil('groq_api_key', config('services.groq.api_key'));
         $this->apiUrl = config('services.groq.api_url');
-        $this->model = config('services.groq.model');
+        $this->model = Pengaturan::ambil('groq_model', config('services.groq.model'));
     }
 
     /**
      * Generate 3 versi jawaban dari chat member
-     * 
+     *
      * @param string $pesanMember Chat dari member yang mau dijawab
      * @return array ['kategori' => '...', 'formal' => '...', 'santai' => '...', 'singkat' => '...']
      */
@@ -121,7 +123,7 @@ PROMPT;
     {
         // Coba parse JSON
         $content = trim($content);
-        
+
         // Hapus markdown code block kalau ada
         $content = preg_replace('/```json\s*/', '', $content);
         $content = preg_replace('/```\s*/', '', $content);

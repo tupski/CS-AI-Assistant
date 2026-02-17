@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') - CS AI Assistant</title>
-    
+
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -37,13 +37,25 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <!-- Logo & Title -->
-                    <div class="flex items-center">
+                    <div class="flex items-center space-x-8">
                         <div class="flex-shrink-0 flex items-center">
                             <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                             </svg>
                             <span class="ml-3 text-xl font-bold">CS AI Assistant</span>
                         </div>
+
+                        <!-- Navigation Menu -->
+                        <nav class="hidden md:flex space-x-4">
+                            <a href="{{ route('dashboard') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard*') ? 'bg-gray-700 text-white' : '' }}">
+                                Dashboard
+                            </a>
+                            @if(Auth::user()->isAdmin())
+                            <a href="{{ route('pengaturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('pengaturan*') ? 'bg-gray-700 text-white' : '' }}">
+                                Pengaturan
+                            </a>
+                            @endif
+                        </nav>
                     </div>
 
                     <!-- User Menu -->
@@ -51,7 +63,16 @@
                         <div class="flex items-center space-x-3">
                             <div class="text-right">
                                 <p class="text-sm font-medium text-white">{{ Auth::user()->name }}</p>
-                                <p class="text-xs text-gray-400">{{ Auth::user()->email }}</p>
+                                <div class="flex items-center gap-1 justify-end">
+                                    @foreach(Auth::user()->roles as $role)
+                                    <span class="text-xs px-2 py-0.5 rounded-full
+                                        {{ $role->nama === 'admin' ? 'bg-red-900/50 text-red-300' : '' }}
+                                        {{ $role->nama === 'supervisor' ? 'bg-yellow-900/50 text-yellow-300' : '' }}
+                                        {{ $role->nama === 'cs' ? 'bg-blue-900/50 text-blue-300' : '' }}">
+                                        {{ $role->label }}
+                                    </span>
+                                    @endforeach
+                                </div>
                             </div>
                             <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
                                 <span class="text-white font-semibold">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
