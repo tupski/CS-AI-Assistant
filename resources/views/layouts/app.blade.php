@@ -50,6 +50,19 @@
                             <a href="{{ route('dashboard') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard*') ? 'bg-gray-700 text-white' : '' }}">
                                 Dashboard
                             </a>
+                            @if(Auth::user()->isAdmin() || Auth::user()->isSupervisor())
+                            <a href="{{ route('faq.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('faq*') ? 'bg-gray-700 text-white' : '' }}">
+                                FAQ
+                            </a>
+                            @endif
+                            @if(Auth::user()->isAdmin())
+                            <a href="{{ route('kategori.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('kategori*') ? 'bg-gray-700 text-white' : '' }}">
+                                Kategori
+                            </a>
+                            @endif
+                            <a href="{{ route('peraturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('peraturan*') ? 'bg-gray-700 text-white' : '' }}">
+                                Peraturan
+                            </a>
                             @if(Auth::user()->isAdmin())
                             <a href="{{ route('pengaturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('pengaturan*') ? 'bg-gray-700 text-white' : '' }}">
                                 Pengaturan

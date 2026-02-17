@@ -5,6 +5,146 @@ Semua perubahan penting pada project CS AI Assistant akan didokumentasikan di fi
 Format berdasarkan [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-17
+
+### ✨ Fitur Baru
+
+#### Content Management System
+- **FAQ Management**
+  - CRUD lengkap untuk FAQ dengan kategori
+  - Filter berdasarkan kategori
+  - Search FAQ berdasarkan judul dan isi
+  - Pagination untuk daftar FAQ
+  - Modal form untuk tambah/edit FAQ
+  - Relasi ke kategori dengan foreign key
+
+- **Kategori Jawaban**
+  - CRUD lengkap untuk kategori
+  - Color picker untuk badge kategori (blue, green, red, yellow, purple)
+  - Icon emoji untuk visual kategori
+  - Deskripsi dan urutan tampilan
+  - Status aktif/nonaktif
+  - Auto-generate slug dari nama
+  - Proteksi hapus jika masih digunakan di FAQ
+  - Grid view dengan preview warna
+
+- **Peraturan & Guidelines CS**
+  - CRUD lengkap untuk peraturan CS
+  - 4 tipe peraturan: Umum, Wajib, Larangan, Tips
+  - 3 level prioritas: Tinggi, Normal, Rendah
+  - Grouped display berdasarkan tipe
+  - Filter berdasarkan tipe dan prioritas
+  - Search peraturan
+  - Icon emoji untuk setiap tipe
+  - Status aktif/nonaktif
+
+#### Database
+- Tabel `kategori` dengan fields: nama, slug, warna, icon, deskripsi, aktif, urutan
+- Tabel `peraturan` dengan fields: judul, isi, tipe, prioritas, aktif, urutan
+- Foreign key `kategori_id` di tabel `faq`
+- Migration untuk backward compatibility
+
+#### Models & Controllers
+- Model `Kategori` dengan auto-slug generation dan query scopes
+- Model `Peraturan` dengan query scopes untuk filter
+- Update model `Faq` dengan relasi ke Kategori
+- `FaqController` dengan CRUD dan filter
+- `KategoriController` dengan CRUD dan validasi
+- `PeraturanController` dengan CRUD dan grouping
+
+#### UI/UX
+- Halaman FAQ dengan table view dan modal form
+- Halaman Kategori dengan grid card view
+- Halaman Peraturan dengan grouped display
+- Color-coded badges untuk kategori
+- Priority badges untuk peraturan
+- Filter dan search di semua halaman
+- Responsive design untuk semua halaman baru
+
+#### Routes & Navigation
+- Route resource untuk FAQ (admin & supervisor)
+- Route resource untuk Kategori (admin only)
+- Route untuk Peraturan (semua bisa lihat, admin bisa edit)
+- Menu navigasi di navbar:
+  - FAQ (admin & supervisor)
+  - Kategori (admin only)
+  - Peraturan (semua role)
+
+#### Seeders
+- `KategoriSeeder` dengan 5 kategori default:
+  - Pembayaran (💰 green)
+  - Pengiriman (📦 blue)
+  - Produk (🛍️ purple)
+  - Komplain (⚠️ red)
+  - Umum (💬 yellow)
+- `PeraturanSeeder` dengan 11 peraturan default:
+  - 3 peraturan wajib
+  - 3 larangan
+  - 3 tips
+  - 2 peraturan umum
+
+### 🔧 Perbaikan
+- Update navigation menu dengan menu baru
+- Update DatabaseSeeder untuk include seeder baru
+- Backward compatibility untuk field kategori string di FAQ
+
+### 📝 Dokumentasi
+- Update README.md dengan fitur baru
+- Update SETUP.md dengan instruksi baru
+- Update CHANGELOG.md ke versi 2.1.0
+
+## [2.0.0] - 2026-02-17
+
+### ✨ Fitur Baru
+
+#### Multi-Role System
+- Sistem role many-to-many (users ↔ roles)
+- 3 role: Admin, Supervisor, Customer Service
+- User bisa punya multiple roles
+- Helper methods di User model: `punyaRole()`, `isAdmin()`, `isSupervisor()`, `isCs()`
+- Middleware `CekRole` untuk proteksi route
+- Role badges di navbar
+
+#### Halaman Pengaturan (Admin Only)
+- **Tab Pengaturan API**:
+  - Input Groq API Key dari UI
+  - Pilih model AI (Llama 3.3, Llama 3.1, Mixtral)
+  - Simpan ke database (tidak perlu edit .env)
+- **Tab Manajemen User**:
+  - Lihat daftar user dengan roles
+  - Tambah user baru dengan multiple roles
+  - Edit user (nama, email, password, roles)
+  - Hapus user (dengan proteksi)
+  - Modal form interaktif
+
+#### Database
+- Tabel `roles` untuk master role
+- Tabel `role_user` untuk pivot many-to-many
+- Tabel `pengaturan` untuk konfigurasi aplikasi
+- Migration dengan relasi yang proper
+
+#### Models & Controllers
+- Model `Role` dengan relasi ke User
+- Model `Pengaturan` dengan helper methods `ambil()` dan `atur()`
+- Update model `User` dengan relasi roles
+- `PengaturanController` untuk CRUD settings dan user
+- Middleware `CekRole` untuk authorization
+
+#### Integrasi
+- `LayananGroq` ambil API key dari database (fallback ke .env)
+- Route protection dengan middleware role
+- Navigation menu dengan active state
+
+### 🔧 Perbaikan
+- Update seeder untuk roles dan pengaturan
+- Update layout dengan role badges
+- Improved security dengan role-based access
+
+### 📝 Dokumentasi
+- Update README.md dengan fitur multi-role
+- Update SETUP.md dengan login credentials baru
+- Update CHANGELOG.md ke versi 2.0.0
+
 ## [1.0.0] - 2026-02-17
 
 ### ✨ Fitur Baru

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Faq extends Model
 {
@@ -15,6 +16,7 @@ class Faq extends Model
      * Field yang boleh diisi mass assignment
      */
     protected $fillable = [
+        'kategori_id',
         'kategori',
         'judul',
         'isi',
@@ -24,7 +26,16 @@ class Faq extends Model
      * Cast tipe data
      */
     protected $casts = [
+        'kategori_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Relasi ke Kategori
+     */
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(Kategori::class);
+    }
 }
