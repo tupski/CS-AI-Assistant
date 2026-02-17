@@ -5,6 +5,79 @@ Semua perubahan penting pada project CS AI Assistant akan didokumentasikan di fi
 Format berdasarkan [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-02-17
+
+### ✨ Fitur Baru
+
+#### AI Enhancement
+- **AI Belajar dari Peraturan**
+  - System prompt AI sekarang include peraturan aktif dari database
+  - Peraturan dikelompokkan berdasarkan tipe (Wajib, Larangan, Tips, Umum)
+  - Prioritas tinggi ditandai khusus dalam prompt
+  - Format peraturan dengan emoji untuk clarity
+
+- **AI Belajar dari Chat History**
+  - System prompt include 5 contoh chat terakhir
+  - AI belajar gaya bahasa dari jawaban sebelumnya
+  - Membantu konsistensi tone dan style
+
+- **AI Guidelines Custom**
+  - Tab baru "AI Guidelines" di halaman Pengaturan
+  - Admin bisa input panduan tambahan untuk AI
+  - Guidelines disimpan di database (key: ai_guidelines)
+  - Otomatis ditambahkan ke system prompt AI
+  - Textarea besar dengan placeholder contoh
+
+#### Regenerate Jawaban
+- **Tombol Regenerate per Tipe**
+  - Tombol regenerate di setiap card jawaban (Formal, Santai, Singkat)
+  - Loading state per card saat regenerate
+  - Hanya update jawaban yang di-regenerate
+  - Icon refresh dengan animasi spin
+  - Toast notification saat berhasil
+
+#### AJAX Search Peraturan
+- **Real-time Search & Filter**
+  - Search peraturan dengan debounce 500ms
+  - Filter berdasarkan tipe (Umum, Wajib, Larangan, Tips)
+  - Filter berdasarkan prioritas (Tinggi, Normal, Rendah)
+  - Tombol Reset untuk clear semua filter
+  - Loading state saat fetch data
+  - Partial view untuk render hasil
+
+### 🔧 Perbaikan
+
+#### LayananGroq Service
+- Method `buatSystemPrompt()` sekarang dynamic
+- Method `formatPeraturan()` untuk format peraturan by tipe
+- Method `formatContohChat()` untuk format chat examples
+- Support AI guidelines dari pengaturan
+
+#### PeraturanController
+- Support AJAX request dengan JSON response
+- Return HTML partial untuk list peraturan
+- Filter dan search di backend
+
+#### PengaturanController
+- Method `updateGuidelines()` untuk simpan AI guidelines
+- Validasi nullable untuk guidelines
+
+#### Dashboard
+- Property `loadingRegenerate` untuk track loading state
+- Method `regenerate(tipe)` untuk regenerate specific answer
+- Update hanya jawaban yang di-regenerate
+
+### 📁 File Baru
+- `resources/views/peraturan/partials/list.blade.php` - Partial view untuk AJAX
+- `database/seeders/UpdateExistingUserSeeder.php` - Seeder untuk update user existing
+- `app/Console/Commands/UpdateUserRole.php` - Command untuk update role user
+
+### 🔄 Routes
+- `POST /pengaturan/guidelines` - Route untuk update AI guidelines
+
+### 📝 Dokumentasi
+- Update CHANGELOG.md ke versi 2.2.0
+
 ## [2.1.0] - 2026-02-17
 
 ### ✨ Fitur Baru
