@@ -5,6 +5,143 @@ Semua perubahan penting pada project CS AI Assistant akan didokumentasikan di fi
 Format berdasarkan [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-02-18
+
+### ✨ Fitur Baru - Multi-Provider AI System
+
+#### Sistem Multi-Provider dengan Auto-Rotation
+- **Tabel AI Provider**
+  - Tabel baru `ai_provider` untuk manage multiple AI providers
+  - Support 4 provider: Groq, OpenAI, Google Gemini, Anthropic Claude
+  - Field: nama, tipe, model, api_key (encrypted), api_url
+  - Quota management: quota_limit, quota_used, quota_reset_date
+  - Error tracking: error_count, last_error_at, last_error_message
+  - Priority system untuk rotation order
+  - Config JSON untuk temperature, max_tokens, dll
+  - User-specific dan global providers
+
+- **Model AiProvider**
+  - Auto encryption/decryption API key menggunakan Laravel Crypt
+  - Method `punyaQuota()` untuk cek ketersediaan quota
+  - Method `resetQuotaJikaPerlu()` untuk auto-reset quota harian
+  - Method `incrementQuota()` untuk tracking usage
+  - Method `catatError()` untuk log errors
+  - Auto-disable provider setelah 5 error berturut-turut
+  - Static method `getBestProvider()` untuk rotation logic
+  - Static method `getAvailableProviders()` untuk filter by user
+
+- **Service LayananAI Universal**
+  - Refactor dari LayananGroq menjadi LayananAI universal
+  - Support multiple providers dengan adapter pattern
+  - Provider-specific API calls:
+    - `callGroq()` - Groq API (OpenAI-compatible)
+    - `callOpenAI()` - OpenAI GPT-4o, GPT-4o-mini
+    - `callGemini()` - Google Gemini 2.0 Flash
+    - `callAnthropic()` - Anthropic Claude 3.5 Sonnet
+  - Auto-rotation saat quota habis atau error
+  - Method `retryWithNextProvider()` untuk failover otomatis
+  - Inherit semua method dari LayananGroq (formatPeraturan, formatFaq, dll)
+  - Support user context untuk personalized settings
+
+- **Pilih Model AI saat Generate**
+  - Dropdown di dashboard untuk pilih provider/model
+  - Hanya tampilkan provider yang ada API key-nya
+  - Option "Auto (Rotasi Otomatis)" untuk smart selection
+  - Display quota usage di dropdown
+  - Provider yang dipilih disimpan di log chat
+
+- **Auto-Rotation System**
+  - Otomatis switch ke provider lain jika quota habis
+  - Otomatis switch jika provider error
+  - Priority-based rotation (angka terkecil = prioritas tertinggi)
+  - Logging untuk tracking rotation events
+  - Graceful fallback dengan error message informatif
+
+- **UI Pengaturan AI Provider**
+  - Halaman `/ai-provider` untuk manage providers
+  - Section Global Providers (untuk semua user)
+  - Section Personal Providers (user-specific)
+  - Fitur per provider:
+    - Update API key dengan show/hide toggle
+    - Enable/disable provider
+    - Quota usage dengan progress bar visual
+    - Reset quota button
+    - Display last used timestamp
+    - Display error count dan last error message
+    - Color-coded quota indicator (green/yellow/red)
+  - Info box dengan penjelasan cara kerja auto-rotation
+  - Toast notification untuk feedback
+
+- **Quota Monitoring Dashboard**
+  - Widget stats di dashboard utama
+  - Display 4 provider teratas dengan status
+  - Real-time quota usage dengan progress bar
+  - Active/inactive indicator
+  - Link ke halaman pengaturan AI Provider
+  - Endpoint `/ai-provider/stats` untuk get usage statistics
+
+- **AiProviderSeeder**
+  - Seeder dengan 6 default providers:
+    1. Groq - Llama 3.3 70B (active, unlimited)
+    2. Groq - Llama 3.1 8B (inactive)
+    3. Google Gemini 2.0 Flash (inactive, 1500/day limit)
+    4. OpenAI GPT-4o (inactive)
+    5. OpenAI GPT-4o Mini (inactive)
+    6. Anthropic Claude 3.5 Sonnet (inactive)
+  - Default config: temperature 0.7, max_tokens 2000
+
+### 🔧 Perubahan
+
+- **DashboardController**
+  - Update untuk support multi-provider
+  - Validasi `provider_id` parameter
+  - Pass selected provider ke LayananAI
+  - Track provider yang digunakan di log chat
+  - Pass available providers ke view
+
+- **Navigation Menu**
+  - Tambah menu "AI Provider" di navbar
+  - Accessible untuk semua user (bukan hanya admin)
+  - Active state indicator
+
+### 📚 API Endpoints Baru
+
+- `GET /ai-provider` - Halaman pengaturan AI Provider
+- `GET /ai-provider/stats` - Get usage statistics semua provider
+- `POST /ai-provider/{id}/api-key` - Update API key provider
+- `POST /ai-provider/{id}/toggle` - Toggle aktif/nonaktif provider
+- `POST /ai-provider/{id}/prioritas` - Update prioritas rotation
+- `POST /ai-provider/{id}/quota` - Update quota limit
+- `POST /ai-provider/{id}/reset-quota` - Reset quota usage
+
+### 🎨 UI/UX Improvements
+
+- Provider selection dropdown di dashboard
+- Quota usage visualization dengan color-coded progress bars
+- Real-time stats widget di dashboard
+- Modern card-based layout untuk provider management
+- Show/hide API key toggle untuk security
+- Toast notifications untuk user feedback
+- Responsive grid layout (1 kolom mobile, 2 kolom desktop)
+
+### 🔒 Security
+
+- API key encryption menggunakan Laravel Crypt
+- Permission checking: user hanya bisa edit provider sendiri
+- Masked API key display dengan show/hide toggle
+- CSRF protection untuk semua endpoints
+
+### 📊 Monitoring & Analytics
+
+- Usage tracking per provider
+- Error counting dan logging
+- Last used timestamp
+- Quota percentage calculation
+- Provider health status
+- Auto-disable unhealthy providers
+
+---
+
 ## [2.3.0] - 2026-02-17
 
 ### ✨ Fitur Baru
