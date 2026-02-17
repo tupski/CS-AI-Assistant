@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\LogChat;
 use App\Models\Pengaturan;
+use App\Models\Peraturan;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -79,6 +81,21 @@ class LayananGroq
      */
     protected function buatSystemPrompt(): string
     {
+        // Ambil peraturan aktif dari database
+        $peraturans = Peraturan::aktif()->urutan()->get();
+        $peraturanText = $this->formatPeraturan($peraturans);
+
+        // Ambil contoh chat dari log (5 terakhir)
+        $contohChat = LogChat::with('user')
+            ->latest()
+            ->limit(5)
+            ->get();
+        $contohChatText = $this->formatContohChat($contohChat);
+
+        // Ambil AI guidelines dari pengaturan (jika ada)
+        $aiGuidelines = Pengaturan::ambil('ai_guidelines', '');
+        $guidelinesText = $aiGuidelines ? "\n\nPANDUAN TAMBAHAN:\n{$aiGuidelines}\n" : '';
+
         return <<<PROMPT
 Kamu adalah asisten AI untuk Customer Service yang profesional dan membantu.
 
@@ -89,6 +106,12 @@ ATURAN PENTING:
 4. Jika nada member terlihat marah atau kecewa, tingkatkan empati dalam jawaban
 5. Jawaban harus berdasarkan konteks yang diberikan
 6. Jangan membuat asumsi tentang kebijakan yang tidak disebutkan
+{$guidelinesText}
+PERATURAN & GUIDELINES CS:
+{$peraturanText}
+
+CONTOH CHAT SEBELUMNYA (untuk referensi gaya bahasa):
+{$contohChatText}
 
 TUGAS:
 Berikan 3 versi jawaban untuk chat member:
@@ -106,6 +129,58 @@ OUTPUT FORMAT (WAJIB JSON):
 
 PENTING: Response harus valid JSON, jangan tambahkan teks apapun di luar JSON.
 PROMPT;
+    }
+
+    /**
+     * Format peraturan untuk system prompt
+     */
+    protected function formatPeraturan($peraturans): string
+    {
+        if ($peraturans->isEmpty()) {
+            return "Tidak ada peraturan khusus.";
+        }
+
+        $grouped = $peraturans->groupBy('tipe');
+        $text = "";
+
+        $tipeLabels = [
+            'wajib' => '✅ WAJIB DILAKUKAN',
+            'larangan' => '🚫 LARANGAN',
+            'tips' => '💡 TIPS & TRIK',
+            'umum' => '📋 PERATURAN UMUM',
+        ];
+
+        foreach ($grouped as $tipe => $items) {
+            $label = $tipeLabels[$tipe] ?? strtoupper($tipe);
+            $text .= "\n{$label}:\n";
+
+            foreach ($items as $peraturan) {
+                $prioritas = $peraturan->prioritas === 'tinggi' ? ' [PRIORITAS TINGGI]' : '';
+                $text .= "- {$peraturan->judul}{$prioritas}\n  {$peraturan->isi}\n";
+            }
+        }
+
+        return $text;
+    }
+
+    /**
+     * Format contoh chat untuk system prompt
+     */
+    protected function formatContohChat($logChats): string
+    {
+        if ($logChats->isEmpty()) {
+            return "Belum ada contoh chat sebelumnya.";
+        }
+
+        $text = "";
+        foreach ($logChats as $index => $log) {
+            $num = $index + 1;
+            $text .= "\nContoh {$num}:\n";
+            $text .= "Member: " . substr($log->pesan_member, 0, 200) . "\n";
+            $text .= "CS (Santai): " . substr($log->jawaban_santai, 0, 200) . "\n";
+        }
+
+        return $text;
     }
 
     /**

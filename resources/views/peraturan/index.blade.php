@@ -35,114 +35,51 @@
     <div x-data="peraturanManager()">
         <!-- Filter & Search -->
         <div class="bg-gray-800 rounded-lg p-4 mb-6">
-            <form method="GET" action="{{ route('peraturan.index') }}" class="flex gap-4">
+            <div class="flex gap-4">
                 <div class="flex-1">
-                    <input type="text" name="search" value="{{ request('search') }}"
+                    <input type="text" x-model="filters.search" @input.debounce.500ms="loadPeraturan()"
                            placeholder="Cari peraturan..."
                            class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="w-48">
-                    <select name="tipe" class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select x-model="filters.tipe" @change="loadPeraturan()"
+                            class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Tipe</option>
-                        <option value="umum" {{ request('tipe') == 'umum' ? 'selected' : '' }}>Umum</option>
-                        <option value="wajib" {{ request('tipe') == 'wajib' ? 'selected' : '' }}>Wajib</option>
-                        <option value="larangan" {{ request('tipe') == 'larangan' ? 'selected' : '' }}>Larangan</option>
-                        <option value="tips" {{ request('tipe') == 'tips' ? 'selected' : '' }}>Tips</option>
+                        <option value="umum">📋 Umum</option>
+                        <option value="wajib">✅ Wajib</option>
+                        <option value="larangan">🚫 Larangan</option>
+                        <option value="tips">💡 Tips</option>
                     </select>
                 </div>
                 <div class="w-48">
-                    <select name="prioritas" class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select x-model="filters.prioritas" @change="loadPeraturan()"
+                            class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Prioritas</option>
-                        <option value="tinggi" {{ request('prioritas') == 'tinggi' ? 'selected' : '' }}>Tinggi</option>
-                        <option value="normal" {{ request('prioritas') == 'normal' ? 'selected' : '' }}>Normal</option>
-                        <option value="rendah" {{ request('prioritas') == 'rendah' ? 'selected' : '' }}>Rendah</option>
+                        <option value="tinggi">🔥 Tinggi</option>
+                        <option value="normal">Normal</option>
+                        <option value="rendah">Rendah</option>
                     </select>
                 </div>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-                    Filter
-                </button>
-                @if(request('search') || request('tipe') || request('prioritas'))
-                <a href="{{ route('peraturan.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg">
+                <button @click="resetFilters()" type="button"
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
                     Reset
-                </a>
-                @endif
-            </form>
-        </div>
-
-        <!-- Peraturan Grouped by Tipe -->
-        @php
-        $tipeConfig = [
-            'wajib' => ['icon' => '✅', 'color' => 'green', 'label' => 'Wajib Dilakukan'],
-            'larangan' => ['icon' => '🚫', 'color' => 'red', 'label' => 'Larangan'],
-            'tips' => ['icon' => '💡', 'color' => 'yellow', 'label' => 'Tips & Trik'],
-            'umum' => ['icon' => '📋', 'color' => 'blue', 'label' => 'Peraturan Umum'],
-        ];
-        @endphp
-
-        @forelse($peraturansGrouped as $tipe => $items)
-        @php $config = $tipeConfig[$tipe] ?? $tipeConfig['umum']; @endphp
-
-        <div class="mb-8">
-            <div class="flex items-center gap-3 mb-4">
-                <span class="text-3xl">{{ $config['icon'] }}</span>
-                <h2 class="text-2xl font-bold text-white">{{ $config['label'] }}</h2>
-                <span class="px-3 py-1 bg-{{ $config['color'] }}-500/20 text-{{ $config['color'] }}-400 rounded-full text-sm">
-                    {{ $items->count() }} item
-                </span>
-            </div>
-
-            <div class="space-y-4">
-                @foreach($items as $peraturan)
-                <div class="bg-gray-800 rounded-lg p-6 border-l-4 border-{{ $config['color'] }}-500">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <h3 class="text-lg font-bold text-white">{{ $peraturan->judul }}</h3>
-
-                                <!-- Prioritas Badge -->
-                                @if($peraturan->prioritas === 'tinggi')
-                                <span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium">
-                                    🔥 Prioritas Tinggi
-                                </span>
-                                @elseif($peraturan->prioritas === 'rendah')
-                                <span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded text-xs font-medium">
-                                    Prioritas Rendah
-                                </span>
-                                @endif
-
-                                <!-- Status Badge -->
-                                <span class="px-2 py-1 rounded text-xs {{ $peraturan->aktif ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400' }}">
-                                    {{ $peraturan->aktif ? 'Aktif' : 'Nonaktif' }}
-                                </span>
-                            </div>
-
-                            <p class="text-gray-300 whitespace-pre-line">{{ $peraturan->isi }}</p>
-                        </div>
-
-                        @if(auth()->user()->isAdmin())
-                        <div class="flex gap-2 ml-4">
-                            <button @click="editPeraturan({{ $peraturan->id }}, '{{ $peraturan->judul }}', `{{ addslashes($peraturan->isi) }}`, '{{ $peraturan->tipe }}', '{{ $peraturan->prioritas }}', {{ $peraturan->aktif ? 'true' : 'false' }}, {{ $peraturan->urutan }})"
-                                    class="text-blue-400 hover:text-blue-300 text-sm">
-                                Edit
-                            </button>
-                            <form action="{{ route('peraturan.destroy', $peraturan) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Yakin hapus peraturan ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-400 hover:text-red-300 text-sm">Hapus</button>
-                            </form>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                @endforeach
+                </button>
             </div>
         </div>
-        @empty
-        <div class="bg-gray-800 rounded-lg p-8 text-center">
-            <p class="text-gray-400">Tidak ada peraturan. Klik "Tambah Peraturan" untuk membuat yang baru.</p>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <p class="text-gray-400 mt-2">Memuat peraturan...</p>
         </div>
-        @endforelse
+
+        <!-- Peraturan List Container -->
+        <div id="peraturan-list" x-show="!loading">
+            @include('peraturan.partials.list', ['peraturansGrouped' => $peraturansGrouped])
+        </div>
 
         <!-- Modal Tambah/Edit Peraturan (Admin Only) -->
         @if(auth()->user()->isAdmin())
@@ -248,6 +185,12 @@ function peraturanManager() {
         showModal: false,
         editMode: false,
         editId: null,
+        loading: false,
+        filters: {
+            search: '{{ request('search') }}',
+            tipe: '{{ request('tipe') }}',
+            prioritas: '{{ request('prioritas') }}'
+        },
         formData: {
             judul: '',
             isi: '',
@@ -255,6 +198,43 @@ function peraturanManager() {
             prioritas: 'normal',
             aktif: true,
             urutan: 0
+        },
+
+        // Load peraturan dengan AJAX
+        async loadPeraturan() {
+            this.loading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.filters.search) params.append('search', this.filters.search);
+                if (this.filters.tipe) params.append('tipe', this.filters.tipe);
+                if (this.filters.prioritas) params.append('prioritas', this.filters.prioritas);
+
+                const response = await fetch(`{{ route('peraturan.index') }}?${params.toString()}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('peraturan-list').innerHTML = data.html;
+                }
+            } catch (error) {
+                console.error('Error loading peraturan:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // Reset filters
+        resetFilters() {
+            this.filters = {
+                search: '',
+                tipe: '',
+                prioritas: ''
+            };
+            this.loadPeraturan();
         },
 
         resetForm() {

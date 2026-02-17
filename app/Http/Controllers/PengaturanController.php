@@ -41,6 +41,21 @@ class PengaturanController extends Controller
     }
 
     /**
+     * Update AI guidelines
+     */
+    public function updateGuidelines(Request $request)
+    {
+        $request->validate([
+            'ai_guidelines' => 'nullable|string',
+        ]);
+
+        Pengaturan::atur('ai_guidelines', $request->ai_guidelines ?? '');
+
+        return redirect()->route('pengaturan.index')
+            ->with('sukses', 'AI Guidelines berhasil disimpan');
+    }
+
+    /**
      * Tambah user baru
      */
     public function tambahUser(Request $request)

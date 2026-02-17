@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-white">Pengaturan</h1>
-        <p class="text-gray-400 mt-2">Kelola API key dan user management</p>
+        <p class="text-gray-400 mt-2">Kelola API key, AI guidelines, dan user management</p>
     </div>
 
     <!-- Tabs -->
@@ -18,6 +18,12 @@
                 :class="tab === 'api' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-400 hover:text-gray-300'"
                 class="py-4 px-1 border-b-2 font-medium text-sm transition">
                 Pengaturan API
+            </button>
+            <button
+                @click="tab = 'guidelines'"
+                :class="tab === 'guidelines' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-400 hover:text-gray-300'"
+                class="py-4 px-1 border-b-2 font-medium text-sm transition">
+                AI Guidelines
             </button>
             <button
                 @click="tab = 'users'"
@@ -72,6 +78,46 @@
                         type="submit"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium">
                         Simpan Pengaturan API
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tab Content: AI Guidelines -->
+    <div x-show="tab === 'guidelines'" class="bg-gray-800 rounded-lg p-6">
+        <h2 class="text-xl font-semibold mb-4">Panduan Tambahan untuk AI</h2>
+        <p class="text-gray-400 text-sm mb-4">
+            Tambahkan instruksi khusus atau panduan tambahan yang akan digunakan AI saat generate jawaban.
+            Panduan ini akan ditambahkan ke system prompt AI.
+        </p>
+
+        <form method="POST" action="{{ route('pengaturan.update-guidelines') }}">
+            @csrf
+
+            <div class="space-y-4">
+                <!-- AI Guidelines Textarea -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        AI Guidelines / System Prompt Tambahan
+                    </label>
+                    <textarea
+                        name="ai_guidelines"
+                        rows="12"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none font-mono text-sm"
+                        placeholder="Contoh:&#10;- Selalu gunakan emoji yang sesuai di akhir kalimat&#10;- Jika member komplain, prioritaskan empati dan solusi&#10;- Hindari kata-kata teknis yang sulit dipahami&#10;- Maksimal 3 paragraf per jawaban"
+                    >{{ $pengaturan['ai_guidelines']->nilai ?? '' }}</textarea>
+                    <p class="text-xs text-gray-400 mt-2">
+                        💡 Tips: Gunakan bullet points untuk instruksi yang jelas. Panduan ini akan digabung dengan peraturan yang sudah ada.
+                    </p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button
+                        type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium">
+                        Simpan AI Guidelines
                     </button>
                 </div>
             </div>

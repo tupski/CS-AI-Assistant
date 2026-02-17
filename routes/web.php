@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->prefix('pengaturan')->name('pengaturan.')->group(function () {
         Route::get('/', [PengaturanController::class, 'index'])->name('index');
         Route::post('/api', [PengaturanController::class, 'updateApi'])->name('update-api');
+        Route::post('/guidelines', [PengaturanController::class, 'updateGuidelines'])->name('update-guidelines');
         Route::post('/user', [PengaturanController::class, 'tambahUser'])->name('tambah-user');
         Route::put('/user/{user}', [PengaturanController::class, 'updateUser'])->name('update-user');
         Route::delete('/user/{user}', [PengaturanController::class, 'hapusUser'])->name('hapus-user');

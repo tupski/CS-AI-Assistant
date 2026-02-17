@@ -38,6 +38,14 @@ class PeraturanController extends Controller
         // Group by tipe untuk tampilan
         $peraturansGrouped = $peraturans->groupBy('tipe');
 
+        // Jika request AJAX, return JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'html' => view('peraturan.partials.list', compact('peraturansGrouped'))->render()
+            ]);
+        }
+
         return view('peraturan.index', compact('peraturansGrouped', 'peraturans'));
     }
 
