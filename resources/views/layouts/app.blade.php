@@ -63,6 +63,9 @@
                             <a href="{{ route('peraturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('peraturan*') ? 'bg-gray-700 text-white' : '' }}">
                                 Peraturan
                             </a>
+                            <a href="{{ route('ai-provider.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('ai-provider*') ? 'bg-gray-700 text-white' : '' }}">
+                                AI Provider
+                            </a>
                             @if(Auth::user()->isAdmin())
                             <a href="{{ route('pengaturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('pengaturan*') ? 'bg-gray-700 text-white' : '' }}">
                                 Pengaturan

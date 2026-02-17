@@ -160,4 +160,47 @@ class AiProviderController extends Controller
             'pesan' => 'Quota berhasil direset',
         ]);
     }
+
+    /**
+     * Get usage statistics untuk semua provider
+     */
+    public function getUsageStats()
+    {
+        $userId = Auth::id();
+        $providers = AiProvider::getAvailableProviders($userId);
+
+        $stats = $providers->map(function ($provider) {
+            $quotaPercentage = 0;
+            if ($provider->quota_limit && $provider->quota_limit > 0) {
+                $quotaPercentage = round(($provider->quota_used / $provider->quota_limit) * 100, 2);
+            }
+
+            return [
+                'id' => $provider->id,
+                'nama' => $provider->nama,
+                'model' => $provider->model,
+                'tipe' => $provider->tipe,
+                'aktif' => $provider->aktif,
+                'prioritas' => $provider->prioritas,
+                'quota_limit' => $provider->quota_limit,
+                'quota_used' => $provider->quota_used,
+                'quota_percentage' => $quotaPercentage,
+                'quota_remaining' => $provider->quota_limit ? ($provider->quota_limit - $provider->quota_used) : null,
+                'quota_reset_date' => $provider->quota_reset_date,
+                'error_count' => $provider->error_count,
+                'last_used_at' => $provider->last_used_at,
+                'last_error_at' => $provider->last_error_at,
+                'last_error_message' => $provider->last_error_message,
+                'has_api_key' => !empty($provider->api_key),
+                'is_user_provider' => $provider->user_id !== null,
+            ];
+        });
+
+        return response()->json([
+            'sukses' => true,
+            'data' => $stats,
+            'total_providers' => $stats->count(),
+            'active_providers' => $stats->where('aktif', true)->count(),
+        ]);
+    }
 }

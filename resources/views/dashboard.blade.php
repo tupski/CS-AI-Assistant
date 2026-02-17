@@ -10,6 +10,65 @@
         <p class="text-gray-400 mt-2">Generate jawaban otomatis untuk chat member dengan AI</p>
     </div>
 
+    <!-- AI Provider Stats Widget -->
+    @if(count($providers) > 0)
+    <div class="mb-6 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-700 rounded-lg p-5">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white flex items-center">
+                <svg class="h-5 w-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                AI Provider Status
+            </h3>
+            <a href="{{ route('ai-provider.index') }}" class="text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                Kelola Provider
+                <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            @foreach($providers->take(4) as $provider)
+            <div class="bg-gray-800/50 rounded-lg p-3 border {{ $provider->aktif ? 'border-green-700' : 'border-gray-700' }}">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold text-gray-400">{{ $provider->nama }}</span>
+                    @if($provider->aktif)
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    @else
+                    <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                    @endif
+                </div>
+                <p class="text-sm text-white font-semibold mb-1">{{ $provider->model }}</p>
+                @if($provider->quota_limit)
+                <div class="mt-2">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-gray-400">Quota</span>
+                        <span class="text-white">{{ $provider->quota_used }}/{{ $provider->quota_limit }}</span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div
+                            class="h-1.5 rounded-full {{ $provider->quota_used / $provider->quota_limit > 0.8 ? 'bg-red-500' : ($provider->quota_used / $provider->quota_limit > 0.5 ? 'bg-yellow-500' : 'bg-green-500') }}"
+                            style="width: {{ min(100, ($provider->quota_used / $provider->quota_limit) * 100) }}%"
+                        ></div>
+                    </div>
+                </div>
+                @else
+                <p class="text-xs text-gray-500 mt-2">Unlimited quota</p>
+                @endif
+            </div>
+            @endforeach
+        </div>
+
+        @if(count($providers) > 4)
+        <p class="text-xs text-gray-400 mt-3 text-center">
+            Dan {{ count($providers) - 4 }} provider lainnya.
+            <a href="{{ route('ai-provider.index') }}" class="text-blue-400 hover:text-blue-300">Lihat semua →</a>
+        </p>
+        @endif
+    </div>
+    @endif
+
     <!-- Layout 2 Kolom -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- KOLOM KIRI: Input -->

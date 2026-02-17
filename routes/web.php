@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
     // Route AI Provider (semua user bisa akses)
     Route::prefix('ai-provider')->name('ai-provider.')->group(function () {
         Route::get('/', [AiProviderController::class, 'index'])->name('index');
+        Route::get('/stats', [AiProviderController::class, 'getUsageStats'])->name('stats');
         Route::post('/{id}/api-key', [AiProviderController::class, 'updateApiKey'])->name('update-api-key');
         Route::post('/{id}/toggle', [AiProviderController::class, 'toggleAktif'])->name('toggle');
         Route::post('/{id}/prioritas', [AiProviderController::class, 'updatePrioritas'])->name('update-prioritas');
