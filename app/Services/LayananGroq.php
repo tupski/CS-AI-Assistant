@@ -39,7 +39,12 @@ class LayananGroq
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(30)->post($this->apiUrl, [
+            ])
+            ->withOptions([
+                'verify' => config('app.env') === 'production', // Disable SSL verify di development
+            ])
+            ->timeout(30)
+            ->post($this->apiUrl, [
                 'model' => $this->model,
                 'messages' => [
                     [
