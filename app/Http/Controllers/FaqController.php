@@ -64,7 +64,16 @@ class FaqController extends Controller
             $validated['kategori'] = $kategori->nama;
         }
 
-        Faq::create($validated);
+        $faq = Faq::create($validated);
+
+        // Jika request AJAX, return JSON
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'sukses' => true,
+                'pesan' => 'FAQ berhasil ditambahkan',
+                'data' => $faq->load('kategoriRelasi')
+            ]);
+        }
 
         return redirect()->route('faq.index')
             ->with('success', 'FAQ berhasil ditambahkan');
@@ -94,6 +103,15 @@ class FaqController extends Controller
         }
 
         $faq->update($validated);
+
+        // Jika request AJAX, return JSON
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'sukses' => true,
+                'pesan' => 'FAQ berhasil diupdate',
+                'data' => $faq->load('kategoriRelasi')
+            ]);
+        }
 
         return redirect()->route('faq.index')
             ->with('success', 'FAQ berhasil diupdate');

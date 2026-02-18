@@ -89,8 +89,8 @@
                         <tr class="hover:bg-gray-700/50">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <template x-if="faq.kategori">
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium"
-                                          :style="`background-color: ${faq.kategori.warna}20; color: ${faq.kategori.warna}; border: 1px solid ${faq.kategori.warna}40;`"
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium shadow-lg"
+                                          :style="`background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${faq.kategori.warna}50; color: ${faq.kategori.warna}; border: 2px solid ${faq.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);`"
                                           x-text="`${faq.kategori.icon} ${faq.kategori.nama}`">
                                     </span>
                                 </template>
@@ -156,8 +156,8 @@
                     </div>
 
                     <div class="mb-4" x-show="detailFaq.kategori">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium"
-                              :style="detailFaq.kategori ? `background-color: ${detailFaq.kategori.warna}20; color: ${detailFaq.kategori.warna}; border: 1px solid ${detailFaq.kategori.warna}40;` : ''"
+                        <span class="px-3 py-1 rounded-full text-xs font-medium shadow-lg"
+                              :style="detailFaq.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${detailFaq.kategori.warna}50; color: ${detailFaq.kategori.warna}; border: 2px solid ${detailFaq.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
                               x-text="detailFaq.kategori ? `${detailFaq.kategori.icon} ${detailFaq.kategori.nama}` : ''">
                         </span>
                     </div>
@@ -191,24 +191,59 @@
                 <div class="relative bg-gray-800 rounded-lg max-w-2xl w-full p-6">
                     <h3 class="text-xl font-bold text-white mb-4">Upload FAQ dari Excel</h3>
 
+                    <!-- Download Template Button -->
+                    <div class="mb-4">
+                        <a href="{{ route('faq.template') }}"
+                           class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold shadow-lg transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Download Template CSV
+                        </a>
+                    </div>
+
                     <div class="mb-4 bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-                        <h4 class="text-blue-300 font-semibold mb-2">📋 Format Excel:</h4>
+                        <h4 class="text-blue-300 font-semibold mb-2">📋 Format File:</h4>
                         <ul class="text-sm text-blue-200 space-y-1">
                             <li>• Kolom 1: <strong>kategori_id</strong> (ID kategori, opsional)</li>
                             <li>• Kolom 2: <strong>judul</strong> (Pertanyaan FAQ)</li>
                             <li>• Kolom 3: <strong>isi</strong> (Jawaban FAQ)</li>
                         </ul>
-                        <a href="{{ route('faq.template') }}" class="inline-block mt-3 text-blue-400 hover:text-blue-300 underline">
-                            📥 Download Template Excel
-                        </a>
                     </div>
 
                     <form @submit.prevent="uploadExcel" enctype="multipart/form-data">
+                        <!-- Drag & Drop Zone -->
                         <div class="mb-4">
-                            <label class="block text-gray-300 mb-2">Pilih File Excel <span class="text-red-400">*</span></label>
-                            <input type="file" @change="handleFileSelect" accept=".xlsx,.xls"
-                                   class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
-                            <p class="text-gray-400 text-sm mt-1">Format: .xlsx atau .xls</p>
+                            <label class="block text-gray-300 mb-2">Upload File <span class="text-red-400">*</span></label>
+                            <div @drop.prevent="handleDrop"
+                                 @dragover.prevent="isDragging = true"
+                                 @dragleave.prevent="isDragging = false"
+                                 @dragenter.prevent
+                                 :class="isDragging ? 'border-green-500 bg-green-900/20' : 'border-gray-600'"
+                                 class="border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer hover:border-green-500 hover:bg-gray-700/50"
+                                 @click="$refs.fileInput.click()">
+                                <input type="file"
+                                       @change="handleFileSelect"
+                                       accept=".csv,.xlsx,.xls"
+                                       class="hidden"
+                                       x-ref="fileInput">
+
+                                <div x-show="!selectedFile">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                    </svg>
+                                    <p class="mt-2 text-gray-300">Klik atau drag & drop file di sini</p>
+                                    <p class="text-sm text-gray-400 mt-1">CSV, XLSX, atau XLS (Max 2MB)</p>
+                                </div>
+
+                                <div x-show="selectedFile" class="text-green-400">
+                                    <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="mt-2 font-semibold" x-text="selectedFile ? selectedFile.name : ''"></p>
+                                    <p class="text-sm text-gray-400" x-text="selectedFile ? (selectedFile.size / 1024).toFixed(2) + ' KB' : ''"></p>
+                                </div>
+                            </div>
                         </div>
 
                         <div x-show="uploadProgress > 0 && uploadProgress < 100" class="mb-4">
@@ -248,7 +283,7 @@
                 <div class="relative bg-gray-800 rounded-lg max-w-2xl w-full p-6">
                     <h3 class="text-xl font-bold text-white mb-4" x-text="editMode ? 'Edit FAQ' : 'Tambah FAQ Baru'"></h3>
 
-                    <form :action="editMode ? `/faq/${editId}` : '{{ route('faq.store') }}'" method="POST">
+                    <form @submit.prevent="simpanFaq">
                         @csrf
                         <input type="hidden" name="_method" x-bind:value="editMode ? 'PUT' : 'POST'">
 
@@ -294,9 +329,13 @@
                                     class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg">
                                 Batal
                             </button>
-                            <button type="submit"
-                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
-                                <span x-text="editMode ? 'Update' : 'Simpan'"></span>
+                            <button type="submit" :disabled="loading"
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg flex items-center gap-2">
+                                <svg x-show="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="loading ? 'Menyimpan...' : (editMode ? 'Update' : 'Simpan')"></span>
                             </button>
                         </div>
                     </form>
@@ -318,6 +357,7 @@ function faqManager() {
         uploading: false,
         uploadProgress: 0,
         selectedFile: null,
+        isDragging: false,
         faqs: [],
         detailFaq: {},
         filters: {
@@ -371,10 +411,10 @@ function faqManager() {
         async salinIsi(isi) {
             try {
                 await navigator.clipboard.writeText(isi);
-                alert('Isi FAQ berhasil disalin!');
+                showNotification('success', 'Berhasil!', 'Isi FAQ berhasil disalin');
             } catch (error) {
                 console.error('Error copying:', error);
-                alert('Gagal menyalin isi FAQ');
+                showNotification('error', 'Gagal!', 'Gagal menyalin isi FAQ');
             }
         },
 
@@ -397,8 +437,44 @@ function faqManager() {
             this.showModal = true;
         },
 
+        async simpanFaq() {
+            this.loading = true;
+
+            try {
+                const url = this.editMode ? `/faq/${this.editId}` : '{{ route("faq.store") }}';
+                const method = this.editMode ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(this.formData)
+                });
+
+                const data = await response.json();
+
+                if (data.sukses) {
+                    showNotification('success', 'Berhasil!', data.pesan || 'FAQ berhasil disimpan');
+                    this.showModal = false;
+                    this.resetForm();
+                    this.loadFaqs();
+                } else {
+                    showNotification('error', 'Gagal!', data.pesan || 'Gagal menyimpan FAQ');
+                }
+            } catch (error) {
+                console.error('Error saving FAQ:', error);
+                showNotification('error', 'Error!', 'Terjadi kesalahan saat menyimpan FAQ');
+            } finally {
+                this.loading = false;
+            }
+        },
+
         async hapusFaq(id) {
-            if (!confirm('Yakin hapus FAQ ini?')) return;
+            const result = await showConfirm('Hapus FAQ?', 'FAQ yang dihapus tidak dapat dikembalikan');
+            if (!result.isConfirmed) return;
 
             try {
                 const response = await fetch(`/faq/${id}`, {
@@ -412,25 +488,35 @@ function faqManager() {
                 const data = await response.json();
 
                 if (data.sukses) {
-                    alert('FAQ berhasil dihapus!');
+                    showNotification('success', 'Berhasil!', 'FAQ berhasil dihapus');
                     this.loadFaqs();
                 } else {
-                    alert(data.pesan || 'Gagal menghapus FAQ');
+                    showNotification('error', 'Gagal!', data.pesan || 'Gagal menghapus FAQ');
                 }
             } catch (error) {
                 console.error('Error deleting FAQ:', error);
-                alert('Gagal menghapus FAQ');
+                showNotification('error', 'Error!', 'Terjadi kesalahan saat menghapus FAQ');
             }
         },
 
         handleFileSelect(event) {
             this.selectedFile = event.target.files[0];
             this.uploadProgress = 0;
+            this.isDragging = false;
+        },
+
+        handleDrop(event) {
+            this.isDragging = false;
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                this.selectedFile = files[0];
+                this.uploadProgress = 0;
+            }
         },
 
         async uploadExcel() {
             if (!this.selectedFile) {
-                alert('Pilih file Excel terlebih dahulu');
+                showNotification('warning', 'Perhatian!', 'Pilih file terlebih dahulu');
                 return;
             }
 
@@ -453,22 +539,22 @@ function faqManager() {
                     if (xhr.status === 200) {
                         const data = JSON.parse(xhr.responseText);
                         if (data.sukses) {
-                            alert(`Berhasil import ${data.imported} FAQ!`);
+                            showNotification('success', 'Berhasil!', `Berhasil import ${data.imported} FAQ`);
                             this.showUploadModal = false;
                             this.selectedFile = null;
                             this.uploadProgress = 0;
                             this.loadFaqs();
                         } else {
-                            alert(data.pesan || 'Gagal upload file');
+                            showNotification('error', 'Gagal!', data.pesan || 'Gagal upload file');
                         }
                     } else {
-                        alert('Gagal upload file');
+                        showNotification('error', 'Error!', 'Gagal upload file');
                     }
                     this.uploading = false;
                 });
 
                 xhr.addEventListener('error', () => {
-                    alert('Gagal upload file');
+                    showNotification('error', 'Error!', 'Terjadi kesalahan saat upload file');
                     this.uploading = false;
                 });
 

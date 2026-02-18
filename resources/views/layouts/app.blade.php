@@ -28,6 +28,40 @@
     <!-- AlpineJS -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Helper function untuk SweetAlert notification
+        function showNotification(type, title, message) {
+            Swal.fire({
+                icon: type,
+                title: title,
+                text: message,
+                timer: 5000,
+                showConfirmButton: true,
+                timerProgressBar: true,
+                showCloseButton: true,
+                toast: false,
+                position: 'center'
+            });
+        }
+
+        // Helper untuk konfirmasi
+        function showConfirm(title, message) {
+            return Swal.fire({
+                icon: 'warning',
+                title: title,
+                text: message,
+                showCancelButton: true,
+                confirmButtonText: 'Ya',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            });
+        }
+    </script>
+
     @stack('styles')
 </head>
 <body class="bg-gray-900 text-white antialiased">
