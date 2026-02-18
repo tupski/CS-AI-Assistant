@@ -34,8 +34,23 @@ class Faq extends Model
     /**
      * Relasi ke Kategori
      */
-    public function kategori(): BelongsTo
+    public function kategoriRelasi(): BelongsTo
     {
-        return $this->belongsTo(Kategori::class);
+        return $this->belongsTo(Kategori::class, 'kategori_id');
+    }
+
+    /**
+     * Accessor untuk kategori (backward compatibility)
+     * Prioritaskan relasi jika ada kategori_id
+     */
+    public function getKategoriAttribute($value)
+    {
+        // Jika ada kategori_id, gunakan relasi
+        if ($this->kategori_id) {
+            return $this->kategoriRelasi;
+        }
+
+        // Jika tidak, return string value dari database
+        return $value;
     }
 }

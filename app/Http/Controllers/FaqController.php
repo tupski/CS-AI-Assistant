@@ -13,7 +13,7 @@ class FaqController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Faq::with('kategori');
+        $query = Faq::with('kategoriRelasi');
 
         // Filter berdasarkan kategori jika ada
         if ($request->filled('kategori_id')) {
@@ -34,9 +34,27 @@ class FaqController extends Controller
 
         // Jika request AJAX, return JSON
         if ($request->ajax() || $request->has('ajax')) {
+            // Transform data untuk frontend
+            $data = $faqs->map(function ($faq) {
+                return [
+                    'id' => $faq->id,
+                    'judul' => $faq->judul,
+                    'isi' => $faq->isi,
+                    'kategori_id' => $faq->kategori_id,
+                    'kategori' => $faq->kategoriRelasi ? [
+                        'id' => $faq->kategoriRelasi->id,
+                        'nama' => $faq->kategoriRelasi->nama,
+                        'warna' => $faq->kategoriRelasi->warna,
+                        'icon' => $faq->kategoriRelasi->icon,
+                    ] : null,
+                    'created_at' => $faq->created_at,
+                    'updated_at' => $faq->updated_at,
+                ];
+            });
+
             return response()->json([
                 'sukses' => true,
-                'data' => $faqs
+                'data' => $data
             ]);
         }
 

@@ -83,7 +83,7 @@ PROMPT;
 
         // Filter by kategori jika ada
         if ($kategori) {
-            $query->whereHas('kategori', function ($q) use ($kategori) {
+            $query->whereHas('kategoriRelasi', function ($q) use ($kategori) {
                 $q->where('nama', 'like', "%{$kategori}%");
             });
         }
@@ -100,18 +100,20 @@ PROMPT;
             });
         }
 
-        return $query->with('kategori')
+        return $query->with('kategoriRelasi')
             ->limit(3)
             ->get()
             ->map(function ($faq) {
+                $kategoriData = $faq->kategoriRelasi;
+
                 return [
                     'id' => $faq->id,
                     'pertanyaan' => $faq->judul,
                     'jawaban' => $faq->isi,
-                    'kategori' => $faq->kategori ? [
-                        'nama' => $faq->kategori->nama,
-                        'warna' => $faq->kategori->warna,
-                        'icon' => $faq->kategori->icon,
+                    'kategori' => $kategoriData ? [
+                        'nama' => $kategoriData->nama,
+                        'warna' => $kategoriData->warna,
+                        'icon' => $kategoriData->icon,
                     ] : null,
                 ];
             })
