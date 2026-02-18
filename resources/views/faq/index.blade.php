@@ -33,35 +33,39 @@
     <div x-data="faqManager()">
         <!-- Filter & Search -->
         <div class="bg-gray-800 rounded-lg p-4 mb-6">
-            <form method="GET" action="{{ route('faq.index') }}" class="flex gap-4">
+            <div class="flex gap-4">
                 <div class="flex-1">
-                    <input type="text" name="search" value="{{ request('search') }}"
+                    <input type="text" x-model="filters.search" @input.debounce.500ms="loadFaqs()"
                            placeholder="Cari FAQ..."
                            class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="w-64">
-                    <select name="kategori_id" class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select x-model="filters.kategori_id" @change="loadFaqs()"
+                            class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Kategori</option>
                         @foreach($kategoris as $kat)
-                        <option value="{{ $kat->id }}" {{ request('kategori_id') == $kat->id ? 'selected' : '' }}>
-                            {{ $kat->nama }}
-                        </option>
+                        <option value="{{ $kat->id }}">{{ $kat->nama }}</option>
                         @endforeach
                     </select>
                 </div>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-                    Filter
-                </button>
-                @if(request('search') || request('kategori_id'))
-                <a href="{{ route('faq.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg">
+                <button @click="resetFilters()" type="button"
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
                     Reset
-                </a>
-                @endif
-            </form>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <p class="text-gray-400 mt-2">Memuat FAQ...</p>
         </div>
 
         <!-- FAQ Table -->
-        <div class="bg-gray-800 rounded-lg overflow-hidden">
+        <div class="bg-gray-800 rounded-lg overflow-hidden" x-show="!loading">
             <table class="w-full">
                 <thead class="bg-gray-700">
                     <tr>
@@ -72,56 +76,95 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    @forelse($faqs as $faq)
-                    <tr class="hover:bg-gray-700/50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @if($faq->kategori && is_object($faq->kategori))
-                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-{{ $faq->kategori->warna ?? 'gray' }}-500/20 text-{{ $faq->kategori->warna ?? 'gray' }}-400">
-                                {{ $faq->kategori->icon }} {{ $faq->kategori->nama }}
-                            </span>
-                            @elseif($faq->kategori && is_string($faq->kategori))
-                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
-                                {{ $faq->kategori }}
-                            </span>
-                            @else
-                            <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
-                                Tanpa Kategori
-                            </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-white font-medium">{{ $faq->judul }}</div>
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="text-gray-400 text-sm line-clamp-2">{{ Str::limit($faq->isi, 100) }}</div>
-                        </td>
-                        <td class="px-6 py-4 text-right space-x-2">
-                            <button @click="editFaq({{ $faq->id }}, '{{ $faq->judul }}', `{{ addslashes($faq->isi) }}`, {{ $faq->kategori_id ?? 'null' }})"
-                                    class="text-blue-400 hover:text-blue-300">
-                                Edit
-                            </button>
-                            <form action="{{ route('faq.destroy', $faq) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('Yakin hapus FAQ ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-400 hover:text-red-300">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-6 py-8 text-center text-gray-400">
-                            Tidak ada FAQ. Klik "Tambah FAQ" untuk membuat yang baru.
-                        </td>
-                    </tr>
-                    @endforelse
+                    <template x-for="faq in faqs" :key="faq.id">
+                        <tr class="hover:bg-gray-700/50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                      :class="faq.kategori ? `bg-${faq.kategori.warna || 'gray'}-500/20 text-${faq.kategori.warna || 'gray'}-400` : 'bg-gray-500/20 text-gray-400'"
+                                      x-text="faq.kategori ? `${faq.kategori.icon} ${faq.kategori.nama}` : 'Tanpa Kategori'">
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-white font-medium" x-text="faq.judul"></div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-gray-400 text-sm">
+                                    <span x-show="faq.isi.length <= 100" x-text="faq.isi"></span>
+                                    <span x-show="faq.isi.length > 100" x-text="faq.isi.substring(0, 100) + '...'"></span>
+                                    <button x-show="faq.isi.length > 100" @click="showDetailModal(faq)"
+                                            class="text-blue-400 hover:text-blue-300 ml-2">
+                                        Lihat Detail
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right space-x-2">
+                                <button @click="salinIsi(faq.isi)"
+                                        class="text-green-400 hover:text-green-300">
+                                    Salin
+                                </button>
+                                <button @click="editFaq(faq.id, faq.judul, faq.isi, faq.kategori_id)"
+                                        class="text-blue-400 hover:text-blue-300">
+                                    Edit
+                                </button>
+                                <button @click="hapusFaq(faq.id)"
+                                        class="text-red-400 hover:text-red-300">
+                                    Hapus
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                    <template x-if="faqs.length === 0">
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-400">
+                                Tidak ada FAQ. Klik "Tambah FAQ" untuk membuat yang baru.
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-6">
-            {{ $faqs->links() }}
+        <!-- Modal Detail FAQ -->
+        <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-black opacity-75" @click="showDetailModal = false"></div>
+
+                <div class="relative bg-gray-800 rounded-lg max-w-3xl w-full p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-white" x-text="detailFaq.judul"></h3>
+                        <button @click="showDetailModal = false" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="mb-4" x-show="detailFaq.kategori">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium"
+                              :class="detailFaq.kategori ? `bg-${detailFaq.kategori.warna || 'gray'}-500/20 text-${detailFaq.kategori.warna || 'gray'}-400` : 'bg-gray-500/20 text-gray-400'"
+                              x-text="detailFaq.kategori ? `${detailFaq.kategori.icon} ${detailFaq.kategori.nama}` : ''">
+                        </span>
+                    </div>
+
+                    <div class="bg-gray-700 rounded-lg p-4 mb-4 max-h-96 overflow-y-auto">
+                        <p class="text-gray-300 whitespace-pre-wrap" x-text="detailFaq.isi"></p>
+                    </div>
+
+                    <div class="flex justify-end gap-2">
+                        <button @click="salinIsi(detailFaq.isi)"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Salin Isi
+                        </button>
+                        <button @click="showDetailModal = false"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal Tambah/Edit FAQ -->
@@ -194,12 +237,68 @@
 function faqManager() {
     return {
         showModal: false,
+        showDetailModal: false,
         editMode: false,
         editId: null,
+        loading: false,
+        faqs: [],
+        detailFaq: {},
+        filters: {
+            search: '',
+            kategori_id: ''
+        },
         formData: {
             kategori_id: '',
             judul: '',
             isi: ''
+        },
+
+        init() {
+            this.loadFaqs();
+        },
+
+        async loadFaqs() {
+            this.loading = true;
+            try {
+                const params = new URLSearchParams();
+                if (this.filters.search) params.append('search', this.filters.search);
+                if (this.filters.kategori_id) params.append('kategori_id', this.filters.kategori_id);
+                params.append('ajax', '1');
+
+                const response = await fetch(`{{ route('faq.index') }}?${params}`);
+                const data = await response.json();
+
+                if (data.sukses) {
+                    this.faqs = data.data;
+                }
+            } catch (error) {
+                console.error('Error loading FAQs:', error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        resetFilters() {
+            this.filters = {
+                search: '',
+                kategori_id: ''
+            };
+            this.loadFaqs();
+        },
+
+        showDetailModal(faq) {
+            this.detailFaq = faq;
+            this.showDetailModal = true;
+        },
+
+        async salinIsi(isi) {
+            try {
+                await navigator.clipboard.writeText(isi);
+                alert('Isi FAQ berhasil disalin!');
+            } catch (error) {
+                console.error('Error copying:', error);
+                alert('Gagal menyalin isi FAQ');
+            }
         },
 
         resetForm() {
@@ -219,6 +318,32 @@ function faqManager() {
                 isi: isi
             };
             this.showModal = true;
+        },
+
+        async hapusFaq(id) {
+            if (!confirm('Yakin hapus FAQ ini?')) return;
+
+            try {
+                const response = await fetch(`/faq/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.sukses) {
+                    alert('FAQ berhasil dihapus!');
+                    this.loadFaqs();
+                } else {
+                    alert(data.pesan || 'Gagal menghapus FAQ');
+                }
+            } catch (error) {
+                console.error('Error deleting FAQ:', error);
+                alert('Gagal menghapus FAQ');
+            }
         }
     }
 }

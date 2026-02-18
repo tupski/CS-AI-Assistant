@@ -56,8 +56,9 @@ PROMPT;
             $this->provider->incrementQuota();
             $this->provider->resetError();
 
-            // Cari FAQ yang relevan
+            // Cari FAQ dan Peraturan yang relevan
             $response['faq_relevan'] = $this->cariFaqRelevan($pesanMember, $response['kategori'] ?? null);
+            $response['peraturan_relevan'] = $this->cariPeraturanRelevan($pesanMember, $response['kategori'] ?? null);
 
             return $response;
         } catch (\Exception $e) {
@@ -108,6 +109,40 @@ PROMPT;
                     'pertanyaan' => $faq->judul,
                     'jawaban' => $faq->isi,
                     'kategori' => $faq->kategori->nama ?? 'Umum',
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Cari Peraturan yang relevan dengan pertanyaan member
+     */
+    protected function cariPeraturanRelevan(string $pesanMember, ?string $kategori = null): array
+    {
+        $query = Peraturan::where('aktif', true);
+
+        // Cari peraturan yang judulnya atau isinya mirip dengan pesan member
+        $keywords = $this->extractKeywords($pesanMember);
+
+        if (!empty($keywords)) {
+            $query->where(function ($q) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $q->orWhere('judul', 'like', "%{$keyword}%")
+                      ->orWhere('isi', 'like', "%{$keyword}%");
+                }
+            });
+        }
+
+        return $query->orderBy('prioritas', 'asc')
+            ->limit(3)
+            ->get()
+            ->map(function ($peraturan) {
+                return [
+                    'id' => $peraturan->id,
+                    'judul' => $peraturan->judul,
+                    'isi' => $peraturan->isi,
+                    'tipe' => $peraturan->tipe,
+                    'prioritas' => $peraturan->prioritas,
                 ];
             })
             ->toArray();

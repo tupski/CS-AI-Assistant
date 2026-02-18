@@ -29,8 +29,16 @@ class FaqController extends Controller
             });
         }
 
-        $faqs = $query->latest()->paginate(15);
+        $faqs = $query->latest()->get();
         $kategoris = Kategori::aktif()->urutan()->get();
+
+        // Jika request AJAX, return JSON
+        if ($request->ajax() || $request->has('ajax')) {
+            return response()->json([
+                'sukses' => true,
+                'data' => $faqs
+            ]);
+        }
 
         return view('faq.index', compact('faqs', 'kategoris'));
     }
@@ -94,9 +102,17 @@ class FaqController extends Controller
     /**
      * Hapus FAQ
      */
-    public function destroy(Faq $faq)
+    public function destroy(Request $request, Faq $faq)
     {
         $faq->delete();
+
+        // Jika request AJAX, return JSON
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'sukses' => true,
+                'pesan' => 'FAQ berhasil dihapus'
+            ]);
+        }
 
         return redirect()->route('faq.index')
             ->with('success', 'FAQ berhasil dihapus');

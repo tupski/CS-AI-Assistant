@@ -352,6 +352,61 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Peraturan Relevan Section -->
+            <div x-show="peraturanRelevan.length > 0" x-transition class="mt-4 md:mt-6">
+                <div class="bg-indigo-900/30 border border-indigo-700 rounded-lg p-3 md:p-5">
+                    <h3 class="text-base md:text-lg font-semibold text-indigo-300 mb-2 md:mb-3 flex items-center">
+                        <svg class="h-4 w-4 md:h-5 md:w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Peraturan Relevan
+                    </h3>
+                    <p class="text-xs md:text-sm text-indigo-200 mb-3 md:mb-4">Peraturan yang mungkin terkait dengan pertanyaan member:</p>
+
+                    <div class="space-y-2 md:space-y-3">
+                        <template x-for="(peraturan, index) in peraturanRelevan" :key="index">
+                            <div class="bg-gray-800 rounded-lg p-3 md:p-4 border border-indigo-700/50" x-data="{ expanded: false }">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1.5 md:mb-2">
+                                            <span class="inline-block px-2 py-0.5 md:py-1 bg-indigo-600/30 text-indigo-300 text-xs rounded-full border border-indigo-600/50 truncate" x-text="peraturan.tipe"></span>
+                                            <span class="inline-block px-2 py-0.5 md:py-1 bg-yellow-600/30 text-yellow-300 text-xs rounded-full border border-yellow-600/50">
+                                                P<span x-text="peraturan.prioritas"></span>
+                                            </span>
+                                        </div>
+                                        <h4 class="text-sm md:text-base font-semibold text-white mb-1.5 md:mb-2 flex items-start">
+                                            <svg class="h-3.5 w-3.5 md:h-4 md:w-4 mr-1 mt-0.5 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <span class="break-words" x-text="peraturan.judul"></span>
+                                        </h4>
+                                    </div>
+                                    <button
+                                        @click="expanded = !expanded"
+                                        class="ml-2 text-indigo-400 hover:text-indigo-300 transition flex-shrink-0"
+                                    >
+                                        <svg x-show="!expanded" class="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        <svg x-show="expanded" class="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div x-show="expanded" x-collapse>
+                                    <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-indigo-700/30">
+                                        <p class="text-xs md:text-sm text-gray-300 whitespace-pre-wrap break-words" x-text="peraturan.isi"></p>
+                                    </div>
+                                </div>
+                                <div x-show="!expanded">
+                                    <p class="text-xs md:text-sm text-gray-400 line-clamp-2 break-words" x-text="peraturan.isi"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -380,6 +435,7 @@ function dashboardApp() {
         jawabanSantai: '',
         jawabanSingkat: '',
         faqRelevan: [], // FAQ yang relevan dengan pertanyaan
+        peraturanRelevan: [], // Peraturan yang relevan dengan pertanyaan
         loading: false,
         loadingRegenerate: null,
         errorMessage: '',
@@ -427,6 +483,7 @@ function dashboardApp() {
                     this.jawabanSantai = data.data.santai;
                     this.jawabanSingkat = data.data.singkat;
                     this.faqRelevan = data.data.faq_relevan || []; // FAQ relevan
+                    this.peraturanRelevan = data.data.peraturan_relevan || []; // Peraturan relevan
                     this.memoryId = data.data.memory_id; // Simpan memory ID
 
                     this.tampilkanToast('Jawaban berhasil di-generate! ✨');
