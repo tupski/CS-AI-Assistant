@@ -8,13 +8,22 @@
             <h1 class="text-3xl font-bold text-white">Kelola FAQ</h1>
             <p class="text-gray-400 mt-1">Manage frequently asked questions</p>
         </div>
-        <button @click="showModal = true; editMode = false; resetForm()"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Tambah FAQ
-        </button>
+        <div class="flex gap-2">
+            <button @click="showUploadModal = true"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                Upload Excel
+            </button>
+            <button @click="showModal = true; editMode = false; resetForm()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah FAQ
+            </button>
+        </div>
     </div>
 
     <!-- Alert Messages -->
@@ -79,10 +88,17 @@
                     <template x-for="faq in faqs" :key="faq.id">
                         <tr class="hover:bg-gray-700/50">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium"
-                                      :class="faq.kategori ? `bg-${faq.kategori.warna || 'gray'}-500/20 text-${faq.kategori.warna || 'gray'}-400` : 'bg-gray-500/20 text-gray-400'"
-                                      x-text="faq.kategori ? `${faq.kategori.icon} ${faq.kategori.nama}` : 'Tanpa Kategori'">
-                                </span>
+                                <template x-if="faq.kategori">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium"
+                                          :style="`background-color: ${faq.kategori.warna}20; color: ${faq.kategori.warna}; border: 1px solid ${faq.kategori.warna}40;`"
+                                          x-text="`${faq.kategori.icon} ${faq.kategori.nama}`">
+                                    </span>
+                                </template>
+                                <template x-if="!faq.kategori">
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
+                                        Tanpa Kategori
+                                    </span>
+                                </template>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-white font-medium" x-text="faq.judul"></div>
@@ -91,7 +107,7 @@
                                 <div class="text-gray-400 text-sm">
                                     <span x-show="faq.isi.length <= 100" x-text="faq.isi"></span>
                                     <span x-show="faq.isi.length > 100" x-text="faq.isi.substring(0, 100) + '...'"></span>
-                                    <button x-show="faq.isi.length > 100" @click="showDetailModal(faq)"
+                                    <button x-show="faq.isi.length > 100" @click="showDetail(faq)"
                                             class="text-blue-400 hover:text-blue-300 ml-2">
                                         Lihat Detail
                                     </button>
@@ -141,7 +157,7 @@
 
                     <div class="mb-4" x-show="detailFaq.kategori">
                         <span class="px-3 py-1 rounded-full text-xs font-medium"
-                              :class="detailFaq.kategori ? `bg-${detailFaq.kategori.warna || 'gray'}-500/20 text-${detailFaq.kategori.warna || 'gray'}-400` : 'bg-gray-500/20 text-gray-400'"
+                              :style="detailFaq.kategori ? `background-color: ${detailFaq.kategori.warna}20; color: ${detailFaq.kategori.warna}; border: 1px solid ${detailFaq.kategori.warna}40;` : ''"
                               x-text="detailFaq.kategori ? `${detailFaq.kategori.icon} ${detailFaq.kategori.nama}` : ''">
                         </span>
                     </div>
@@ -163,6 +179,63 @@
                             Tutup
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Upload Excel -->
+        <div x-show="showUploadModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-black opacity-75" @click="showUploadModal = false"></div>
+
+                <div class="relative bg-gray-800 rounded-lg max-w-2xl w-full p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">Upload FAQ dari Excel</h3>
+
+                    <div class="mb-4 bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+                        <h4 class="text-blue-300 font-semibold mb-2">📋 Format Excel:</h4>
+                        <ul class="text-sm text-blue-200 space-y-1">
+                            <li>• Kolom 1: <strong>kategori_id</strong> (ID kategori, opsional)</li>
+                            <li>• Kolom 2: <strong>judul</strong> (Pertanyaan FAQ)</li>
+                            <li>• Kolom 3: <strong>isi</strong> (Jawaban FAQ)</li>
+                        </ul>
+                        <a href="{{ route('faq.template') }}" class="inline-block mt-3 text-blue-400 hover:text-blue-300 underline">
+                            📥 Download Template Excel
+                        </a>
+                    </div>
+
+                    <form @submit.prevent="uploadExcel" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Pilih File Excel <span class="text-red-400">*</span></label>
+                            <input type="file" @change="handleFileSelect" accept=".xlsx,.xls"
+                                   class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <p class="text-gray-400 text-sm mt-1">Format: .xlsx atau .xls</p>
+                        </div>
+
+                        <div x-show="uploadProgress > 0 && uploadProgress < 100" class="mb-4">
+                            <div class="bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full transition-all duration-300" :style="`width: ${uploadProgress}%`"></div>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1" x-text="`Uploading: ${uploadProgress}%`"></p>
+                        </div>
+
+                        <div class="flex justify-end gap-2">
+                            <button type="button" @click="showUploadModal = false"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                                Batal
+                            </button>
+                            <button type="submit" :disabled="!selectedFile || uploading"
+                                    class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                                <svg x-show="!uploading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <svg x-show="uploading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="uploading ? 'Uploading...' : 'Upload'"></span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -238,9 +311,13 @@ function faqManager() {
     return {
         showModal: false,
         showDetailModal: false,
+        showUploadModal: false,
         editMode: false,
         editId: null,
         loading: false,
+        uploading: false,
+        uploadProgress: 0,
+        selectedFile: null,
         faqs: [],
         detailFaq: {},
         filters: {
@@ -286,7 +363,7 @@ function faqManager() {
             this.loadFaqs();
         },
 
-        showDetailModal(faq) {
+        showDetail(faq) {
             this.detailFaq = faq;
             this.showDetailModal = true;
         },
@@ -343,6 +420,65 @@ function faqManager() {
             } catch (error) {
                 console.error('Error deleting FAQ:', error);
                 alert('Gagal menghapus FAQ');
+            }
+        },
+
+        handleFileSelect(event) {
+            this.selectedFile = event.target.files[0];
+            this.uploadProgress = 0;
+        },
+
+        async uploadExcel() {
+            if (!this.selectedFile) {
+                alert('Pilih file Excel terlebih dahulu');
+                return;
+            }
+
+            this.uploading = true;
+            this.uploadProgress = 0;
+
+            const formData = new FormData();
+            formData.append('file', this.selectedFile);
+
+            try {
+                const xhr = new XMLHttpRequest();
+
+                xhr.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        this.uploadProgress = Math.round((e.loaded / e.total) * 100);
+                    }
+                });
+
+                xhr.addEventListener('load', () => {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.sukses) {
+                            alert(`Berhasil import ${data.imported} FAQ!`);
+                            this.showUploadModal = false;
+                            this.selectedFile = null;
+                            this.uploadProgress = 0;
+                            this.loadFaqs();
+                        } else {
+                            alert(data.pesan || 'Gagal upload file');
+                        }
+                    } else {
+                        alert('Gagal upload file');
+                    }
+                    this.uploading = false;
+                });
+
+                xhr.addEventListener('error', () => {
+                    alert('Gagal upload file');
+                    this.uploading = false;
+                });
+
+                xhr.open('POST', '{{ route("faq.import") }}');
+                xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+                xhr.send(formData);
+            } catch (error) {
+                console.error('Error uploading:', error);
+                alert('Gagal upload file');
+                this.uploading = false;
             }
         }
     }

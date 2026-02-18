@@ -31,6 +31,8 @@ Route::middleware('auth')->group(function () {
 
     // Route FAQ (admin & supervisor)
     Route::middleware('role:admin,supervisor')->group(function () {
+        Route::get('/faq/template', [FaqController::class, 'template'])->name('faq.template');
+        Route::post('/faq/import', [FaqController::class, 'import'])->name('faq.import');
         Route::resource('faq', FaqController::class)->except(['show', 'create', 'edit']);
     });
 

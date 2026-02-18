@@ -117,4 +117,91 @@ class FaqController extends Controller
         return redirect()->route('faq.index')
             ->with('success', 'FAQ berhasil dihapus');
     }
+
+    /**
+     * Download template Excel untuk import
+     */
+    public function template()
+    {
+        $filename = 'template_faq.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function() {
+            $file = fopen('php://output', 'w');
+            // Header CSV
+            fputcsv($file, ['kategori_id', 'judul', 'isi']);
+            // Contoh data
+            fputcsv($file, ['1', 'Bagaimana cara deposit?', 'Untuk melakukan deposit, silakan login ke akun Anda...']);
+            fputcsv($file, ['2', 'Berapa minimal withdraw?', 'Minimal withdraw adalah Rp 50.000...']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import FAQ dari Excel/CSV
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:2048'
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $extension = $file->getClientOriginalExtension();
+
+            $imported = 0;
+
+            if ($extension === 'csv') {
+                // Handle CSV
+                $handle = fopen($file->getRealPath(), 'r');
+                $header = fgetcsv($handle); // Skip header
+
+                while (($row = fgetcsv($handle)) !== false) {
+                    if (count($row) >= 2) {
+                        $kategoriId = !empty($row[0]) && is_numeric($row[0]) ? $row[0] : null;
+                        $judul = $row[1] ?? '';
+                        $isi = $row[2] ?? '';
+
+                        if (!empty($judul) && !empty($isi)) {
+                            $data = [
+                                'kategori_id' => $kategoriId,
+                                'judul' => $judul,
+                                'isi' => $isi,
+                            ];
+
+                            // Set kategori string untuk backward compatibility
+                            if ($kategoriId) {
+                                $kategori = Kategori::find($kategoriId);
+                                if ($kategori) {
+                                    $data['kategori'] = $kategori->nama;
+                                }
+                            }
+
+                            Faq::create($data);
+                            $imported++;
+                        }
+                    }
+                }
+                fclose($handle);
+            }
+
+            return response()->json([
+                'sukses' => true,
+                'imported' => $imported,
+                'pesan' => "Berhasil import $imported FAQ"
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'sukses' => false,
+                'pesan' => 'Gagal import: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -515,7 +515,8 @@ function dashboardApp() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
                     body: JSON.stringify({
-                        pesan_member: this.pesanMember
+                        pesan_member: this.pesanMember,
+                        provider_id: this.providerId || null
                     })
                 });
 

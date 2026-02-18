@@ -46,32 +46,46 @@
                         </div>
 
                         <!-- Navigation Menu -->
-                        <nav class="hidden md:flex space-x-1">
+                        <nav class="hidden md:flex space-x-1" x-data="{ openDropdown: null }">
                             <!-- Dashboard -->
                             <a href="{{ route('dashboard') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('dashboard*') ? 'bg-gray-700 text-white' : '' }}">
                                 Dashboard
                             </a>
 
-                            <!-- Knowledge Base (Admin & Supervisor) -->
+                            <!-- Knowledge Base Dropdown (Admin & Supervisor) -->
                             @if(Auth::user()->isAdmin() || Auth::user()->isSupervisor())
-                            <a href="{{ route('faq.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('faq*') ? 'bg-gray-700 text-white' : '' }}">
-                                FAQ
-                            </a>
-                            <a href="{{ route('peraturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('peraturan*') ? 'bg-gray-700 text-white' : '' }}">
-                                Peraturan
-                            </a>
+                            <div class="relative" @mouseenter="openDropdown = 'knowledge'" @mouseleave="openDropdown = null">
+                                <button class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center {{ request()->routeIs('faq*') || request()->routeIs('peraturan*') || request()->routeIs('kategori*') ? 'bg-gray-700 text-white' : '' }}">
+                                    Knowledge Base
+                                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="openDropdown === 'knowledge'"
+                                     x-transition
+                                     class="absolute left-0 mt-1 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-50">
+                                    <a href="{{ route('faq.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('faq*') ? 'bg-gray-700 text-white' : '' }}">
+                                        📋 FAQ
+                                    </a>
+                                    <a href="{{ route('peraturan.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('peraturan*') ? 'bg-gray-700 text-white' : '' }}">
+                                        📜 Peraturan
+                                    </a>
+                                    @if(Auth::user()->isAdmin())
+                                    <a href="{{ route('kategori.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('kategori*') ? 'bg-gray-700 text-white' : '' }}">
+                                        🏷️ Kategori
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
                             @endif
 
-                            <!-- AI Settings -->
+                            <!-- AI Provider -->
                             <a href="{{ route('ai-provider.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('ai-provider*') ? 'bg-gray-700 text-white' : '' }}">
                                 AI Provider
                             </a>
 
-                            <!-- Admin Only -->
+                            <!-- Pengaturan (Admin Only) -->
                             @if(Auth::user()->isAdmin())
-                            <a href="{{ route('kategori.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('kategori*') ? 'bg-gray-700 text-white' : '' }}">
-                                Kategori
-                            </a>
                             <a href="{{ route('pengaturan.index') }}" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('pengaturan*') ? 'bg-gray-700 text-white' : '' }}">
                                 Pengaturan
                             </a>
