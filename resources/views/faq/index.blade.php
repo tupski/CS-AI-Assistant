@@ -86,7 +86,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-700">
                     <template x-for="faq in faqs" :key="faq.id">
-                        <tr class="hover:bg-gray-700/50">
+                        <tr :id="`faq-${faq.id}`" class="hover:bg-gray-700/50 transition-all duration-300">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <template x-if="faq.kategori">
                                     <span class="px-3 py-1 rounded-full text-xs font-medium shadow-lg"
@@ -284,9 +284,6 @@
                     <h3 class="text-xl font-bold text-white mb-4" x-text="editMode ? 'Edit FAQ' : 'Tambah FAQ Baru'"></h3>
 
                     <form @submit.prevent="simpanFaq">
-                        @csrf
-                        <input type="hidden" name="_method" x-bind:value="editMode ? 'PUT' : 'POST'">
-
                         <div class="space-y-4">
                             <!-- Kategori -->
                             <div>
@@ -372,6 +369,32 @@ function faqManager() {
 
         init() {
             this.loadFaqs();
+            this.handleHighlight();
+        },
+
+        handleHighlight() {
+            // Ambil parameter dari URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const highlight = urlParams.get('highlight');
+            const faqId = urlParams.get('id');
+
+            if (highlight) {
+                this.filters.search = highlight;
+
+                // Jika ada ID, scroll ke FAQ tersebut setelah load
+                if (faqId) {
+                    setTimeout(() => {
+                        const element = document.getElementById(`faq-${faqId}`);
+                        if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            element.classList.add('ring-2', 'ring-yellow-400');
+                            setTimeout(() => {
+                                element.classList.remove('ring-2', 'ring-yellow-400');
+                            }, 3000);
+                        }
+                    }, 500);
+                }
+            }
         },
 
         async loadFaqs() {

@@ -108,7 +108,11 @@ PROMPT;
                     'id' => $faq->id,
                     'pertanyaan' => $faq->judul,
                     'jawaban' => $faq->isi,
-                    'kategori' => $faq->kategori->nama ?? 'Umum',
+                    'kategori' => $faq->kategori ? [
+                        'nama' => $faq->kategori->nama,
+                        'warna' => $faq->kategori->warna,
+                        'icon' => $faq->kategori->icon,
+                    ] : null,
                 ];
             })
             ->toArray();

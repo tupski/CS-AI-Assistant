@@ -10,64 +10,114 @@
         <p class="text-sm md:text-base text-gray-400 mt-1 md:mt-2">Generate jawaban otomatis untuk chat member dengan AI</p>
     </div>
 
-    <!-- AI Provider Stats Widget -->
+    <!-- AI Provider Stats Widget (Collapsible) -->
     @if(count($providers) > 0)
-    <div class="mb-4 md:mb-6 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-700 rounded-lg p-3 md:p-5">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 md:mb-4">
-            <h3 class="text-base md:text-lg font-semibold text-white flex items-center">
+    <div class="mb-4 md:mb-6 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-700 rounded-lg p-3 md:p-5" x-data="{ showProviders: false }">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+            <button @click="showProviders = !showProviders" class="text-base md:text-lg font-semibold text-white flex items-center hover:text-blue-300 transition-colors">
                 <svg class="h-4 w-4 md:h-5 md:w-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
                 AI Provider Status
-            </h3>
-            <a href="{{ route('ai-provider.index') }}" class="text-xs md:text-sm text-blue-400 hover:text-blue-300 flex items-center">
-                Kelola Provider
-                <svg class="h-3 w-3 md:h-4 md:w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <svg class="h-4 w-4 ml-2 transition-transform" :class="showProviders ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
-            </a>
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400">{{ $providers->where('aktif', true)->count() }} Active</span>
+                <a href="{{ route('ai-provider.index') }}" class="text-xs md:text-sm text-blue-400 hover:text-blue-300 flex items-center">
+                    Kelola
+                    <svg class="h-3 w-3 md:h-4 md:w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
-            @foreach($providers->take(4) as $provider)
-            <div class="bg-gray-800/50 rounded-lg p-2.5 md:p-3 border {{ $provider->aktif ? 'border-green-700' : 'border-gray-700' }}">
-                <div class="flex items-center justify-between mb-1.5 md:mb-2">
-                    <span class="text-xs font-semibold text-gray-400 truncate mr-2">{{ $provider->nama }}</span>
-                    @if($provider->aktif)
-                    <span class="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+        <div x-show="showProviders" x-collapse class="mt-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+                @foreach($providers->take(4) as $provider)
+                <div class="bg-gray-800/50 rounded-lg p-2.5 md:p-3 border {{ $provider->aktif ? 'border-green-700' : 'border-gray-700' }}">
+                    <div class="flex items-center justify-between mb-1.5 md:mb-2">
+                        <span class="text-xs font-semibold text-gray-400 truncate mr-2">{{ $provider->nama }}</span>
+                        @if($provider->aktif)
+                        <span class="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
+                        @else
+                        <span class="w-2 h-2 bg-gray-500 rounded-full flex-shrink-0"></span>
+                        @endif
+                    </div>
+                    <p class="text-xs md:text-sm text-white font-semibold mb-1 truncate">{{ $provider->model }}</p>
+                    @if($provider->quota_limit)
+                    <div class="mt-2">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-gray-400">Quota</span>
+                            <span class="text-white">{{ $provider->quota_used }}/{{ $provider->quota_limit }}</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-1.5">
+                            <div
+                                class="h-1.5 rounded-full {{ $provider->quota_used / $provider->quota_limit > 0.8 ? 'bg-red-500' : ($provider->quota_used / $provider->quota_limit > 0.5 ? 'bg-yellow-500' : 'bg-green-500') }}"
+                                style="width: {{ min(100, ($provider->quota_used / $provider->quota_limit) * 100) }}%"
+                            ></div>
+                        </div>
+                    </div>
                     @else
-                    <span class="w-2 h-2 bg-gray-500 rounded-full flex-shrink-0"></span>
+                    <p class="text-xs text-gray-500 mt-2">Unlimited quota</p>
                     @endif
                 </div>
-                <p class="text-xs md:text-sm text-white font-semibold mb-1 truncate">{{ $provider->model }}</p>
-                @if($provider->quota_limit)
-                <div class="mt-2">
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-gray-400">Quota</span>
-                        <span class="text-white">{{ $provider->quota_used }}/{{ $provider->quota_limit }}</span>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-1.5">
-                        <div
-                            class="h-1.5 rounded-full {{ $provider->quota_used / $provider->quota_limit > 0.8 ? 'bg-red-500' : ($provider->quota_used / $provider->quota_limit > 0.5 ? 'bg-yellow-500' : 'bg-green-500') }}"
-                            style="width: {{ min(100, ($provider->quota_used / $provider->quota_limit) * 100) }}%"
-                        ></div>
-                    </div>
-                </div>
-                @else
-                <p class="text-xs text-gray-500 mt-2">Unlimited quota</p>
-                @endif
+                @endforeach
             </div>
-            @endforeach
-        </div>
 
-        @if(count($providers) > 4)
-        <p class="text-xs text-gray-400 mt-3 text-center">
-            Dan {{ count($providers) - 4 }} provider lainnya.
-            <a href="{{ route('ai-provider.index') }}" class="text-blue-400 hover:text-blue-300">Lihat semua →</a>
-        </p>
-        @endif
+            @if(count($providers) > 4)
+            <p class="text-xs text-gray-400 mt-3 text-center">
+                Dan {{ count($providers) - 4 }} provider lainnya.
+                <a href="{{ route('ai-provider.index') }}" class="text-blue-400 hover:text-blue-300">Lihat semua →</a>
+            </p>
+            @endif
+        </div>
     </div>
     @endif
+
+    <!-- Quick Search FAQ -->
+    <div class="mb-4 md:mb-6 bg-gray-800 rounded-lg border border-gray-700 p-4" x-data="{ searchQuery: '', searchResults: [], searching: false }">
+        <div class="flex items-center gap-3">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text"
+                   x-model="searchQuery"
+                   @input.debounce.300ms="searchFAQ()"
+                   placeholder="Cari di FAQ... (ketik minimal 3 karakter)"
+                   class="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg x-show="searching" class="animate-spin h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- Search Results -->
+        <div x-show="searchResults.length > 0" class="mt-3 space-y-2 max-h-60 overflow-y-auto">
+            <template x-for="result in searchResults" :key="result.id">
+                <a :href="`/faq?highlight=${encodeURIComponent(searchQuery)}&id=${result.id}`"
+                   class="block bg-gray-700/50 hover:bg-gray-700 rounded-lg p-3 transition-colors border border-gray-600 hover:border-blue-500">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white font-medium mb-1" x-html="highlightText(result.judul, searchQuery)"></p>
+                            <p class="text-sm text-gray-400 line-clamp-2" x-html="highlightText(result.isi, searchQuery)"></p>
+                        </div>
+                        <span x-show="result.kategori"
+                              class="px-2 py-1 rounded text-xs font-medium shadow-lg flex-shrink-0"
+                              :style="result.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${result.kategori.warna}50; color: ${result.kategori.warna}; border: 2px solid ${result.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
+                              x-text="result.kategori ? `${result.kategori.icon} ${result.kategori.nama}` : ''">
+                        </span>
+                    </div>
+                </a>
+            </template>
+        </div>
+
+        <p x-show="searchQuery.length >= 3 && searchResults.length === 0 && !searching" class="text-sm text-gray-400 mt-3 text-center">
+            Tidak ada hasil untuk "<span x-text="searchQuery"></span>"
+        </p>
+    </div>
 
     <!-- Layout 2 Kolom -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -318,7 +368,11 @@
                                 <div class="flex items-start justify-between mb-2">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-1.5 md:mb-2">
-                                            <span class="inline-block px-2 py-0.5 md:py-1 bg-purple-600/30 text-purple-300 text-xs rounded-full border border-purple-600/50 truncate" x-text="faq.kategori"></span>
+                                            <span x-show="faq.kategori"
+                                                  class="inline-block px-2 py-0.5 md:py-1 text-xs rounded-full shadow-lg"
+                                                  :style="faq.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${faq.kategori.warna}50; color: ${faq.kategori.warna}; border: 2px solid ${faq.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
+                                                  x-text="faq.kategori ? `${faq.kategori.icon} ${faq.kategori.nama}` : ''">
+                                            </span>
                                         </div>
                                         <h4 class="text-sm md:text-base font-semibold text-white mb-1.5 md:mb-2 flex items-start">
                                             <svg class="h-3.5 w-3.5 md:h-4 md:w-4 mr-1 mt-0.5 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -620,6 +674,32 @@ function dashboardApp() {
             setTimeout(() => {
                 this.showToast = false;
             }, 3000);
+        },
+
+        async searchFAQ() {
+            if (this.searchQuery.length < 3) {
+                this.searchResults = [];
+                return;
+            }
+
+            this.searching = true;
+            try {
+                const response = await fetch(`/faq?ajax=1&search=${encodeURIComponent(this.searchQuery)}`);
+                const data = await response.json();
+                if (data.sukses) {
+                    this.searchResults = data.data;
+                }
+            } catch (error) {
+                console.error('Error searching FAQ:', error);
+            } finally {
+                this.searching = false;
+            }
+        },
+
+        highlightText(text, query) {
+            if (!query || !text) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<mark class="bg-yellow-400 text-gray-900 px-1 rounded">$1</mark>');
         }
     }
 }
