@@ -87,14 +87,14 @@ PROMPT;
             });
         }
 
-        // Cari FAQ yang pertanyaannya mirip dengan pesan member
+        // Cari FAQ yang judulnya atau isinya mirip dengan pesan member
         $keywords = $this->extractKeywords($pesanMember);
 
         if (!empty($keywords)) {
             $query->where(function ($q) use ($keywords) {
                 foreach ($keywords as $keyword) {
-                    $q->orWhere('pertanyaan', 'like', "%{$keyword}%")
-                      ->orWhere('jawaban', 'like', "%{$keyword}%");
+                    $q->orWhere('judul', 'like', "%{$keyword}%")
+                      ->orWhere('isi', 'like', "%{$keyword}%");
                 }
             });
         }
@@ -105,8 +105,8 @@ PROMPT;
             ->map(function ($faq) {
                 return [
                     'id' => $faq->id,
-                    'pertanyaan' => $faq->pertanyaan,
-                    'jawaban' => $faq->jawaban,
+                    'pertanyaan' => $faq->judul,
+                    'jawaban' => $faq->isi,
                     'kategori' => $faq->kategori->nama ?? 'Umum',
                 ];
             })
