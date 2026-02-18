@@ -3,22 +3,22 @@
 @section('title', 'Pengaturan')
 
 @section('content')
-<div x-data="{ tab: 'api' }">
+<div x-data="{ tab: 'guidelines' }">
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-3xl font-bold text-white">Pengaturan</h1>
-        <p class="text-gray-400 mt-2">Kelola API key, AI guidelines, dan user management</p>
+        <p class="text-gray-400 mt-2">Kelola AI guidelines dan user management</p>
+        <div class="mt-3 bg-blue-900/30 border border-blue-700 rounded-lg p-3">
+            <p class="text-sm text-blue-200">
+                💡 <strong>Info:</strong> Pengaturan AI Provider (API Key, Model, dll) sudah dipindahkan ke menu
+                <a href="{{ route('ai-provider.index') }}" class="text-blue-400 hover:text-blue-300 underline font-semibold">AI Provider</a>
+            </p>
+        </div>
     </div>
 
     <!-- Tabs -->
     <div class="border-b border-gray-700 mb-6">
         <nav class="-mb-px flex space-x-8">
-            <button
-                @click="tab = 'api'"
-                :class="tab === 'api' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-400 hover:text-gray-300'"
-                class="py-4 px-1 border-b-2 font-medium text-sm transition">
-                Pengaturan API
-            </button>
             <button
                 @click="tab = 'guidelines'"
                 :class="tab === 'guidelines' ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-400 hover:text-gray-300'"
@@ -32,56 +32,6 @@
                 Manajemen User
             </button>
         </nav>
-    </div>
-
-    <!-- Tab Content: API Settings -->
-    <div x-show="tab === 'api'" class="bg-gray-800 rounded-lg p-6">
-        <h2 class="text-xl font-semibold mb-4">Konfigurasi Groq API</h2>
-
-        <form method="POST" action="{{ route('pengaturan.update-api') }}">
-            @csrf
-
-            <div class="space-y-4">
-                <!-- API Key -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        Groq API Key
-                    </label>
-                    <input
-                        type="password"
-                        name="groq_api_key"
-                        value="{{ $pengaturan['groq_api_key']->nilai ?? '' }}"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="gsk_..."
-                        required>
-                    <p class="text-xs text-gray-400 mt-1">Dapatkan API key dari <a href="https://console.groq.com" target="_blank" class="text-blue-400 hover:underline">console.groq.com</a></p>
-                </div>
-
-                <!-- Model -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        Model
-                    </label>
-                    <select
-                        name="groq_model"
-                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required>
-                        <option value="llama-3.3-70b-versatile" {{ ($pengaturan['groq_model']->nilai ?? '') === 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B Versatile</option>
-                        <option value="llama-3.1-70b-versatile" {{ ($pengaturan['groq_model']->nilai ?? '') === 'llama-3.1-70b-versatile' ? 'selected' : '' }}>Llama 3.1 70B Versatile</option>
-                        <option value="mixtral-8x7b-32768" {{ ($pengaturan['groq_model']->nilai ?? '') === 'mixtral-8x7b-32768' ? 'selected' : '' }}>Mixtral 8x7B</option>
-                    </select>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="pt-4">
-                    <button
-                        type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium">
-                        Simpan Pengaturan API
-                    </button>
-                </div>
-            </div>
-        </form>
     </div>
 
     <!-- Tab Content: AI Guidelines -->

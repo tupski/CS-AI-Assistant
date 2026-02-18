@@ -300,6 +300,58 @@
                     ></textarea>
                 </div>
             </div>
+
+            <!-- FAQ Relevan Section -->
+            <div x-show="faqRelevan.length > 0" x-transition class="mt-6">
+                <div class="bg-purple-900/30 border border-purple-700 rounded-lg p-5">
+                    <h3 class="text-lg font-semibold text-purple-300 mb-3 flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        FAQ Relevan
+                    </h3>
+                    <p class="text-sm text-purple-200 mb-4">Referensi FAQ yang mungkin sesuai dengan pertanyaan member:</p>
+
+                    <div class="space-y-3">
+                        <template x-for="(faq, index) in faqRelevan" :key="index">
+                            <div class="bg-gray-800 rounded-lg p-4 border border-purple-700/50" x-data="{ expanded: false }">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="inline-block px-2 py-1 bg-purple-600/30 text-purple-300 text-xs rounded-full border border-purple-600/50" x-text="faq.kategori"></span>
+                                        </div>
+                                        <h4 class="font-semibold text-white mb-2 flex items-start">
+                                            <svg class="h-4 w-4 mr-1 mt-0.5 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span x-text="faq.pertanyaan"></span>
+                                        </h4>
+                                    </div>
+                                    <button
+                                        @click="expanded = !expanded"
+                                        class="ml-2 text-purple-400 hover:text-purple-300 transition flex-shrink-0"
+                                    >
+                                        <svg x-show="!expanded" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                        <svg x-show="expanded" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div x-show="expanded" x-collapse>
+                                    <div class="mt-3 pt-3 border-t border-purple-700/30">
+                                        <p class="text-sm text-gray-300 whitespace-pre-wrap" x-text="faq.jawaban"></p>
+                                    </div>
+                                </div>
+                                <div x-show="!expanded">
+                                    <p class="text-sm text-gray-400 line-clamp-2" x-text="faq.jawaban"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -327,6 +379,7 @@ function dashboardApp() {
         jawabanFormal: '',
         jawabanSantai: '',
         jawabanSingkat: '',
+        faqRelevan: [], // FAQ yang relevan dengan pertanyaan
         loading: false,
         loadingRegenerate: null,
         errorMessage: '',
@@ -373,6 +426,7 @@ function dashboardApp() {
                     this.jawabanFormal = data.data.formal;
                     this.jawabanSantai = data.data.santai;
                     this.jawabanSingkat = data.data.singkat;
+                    this.faqRelevan = data.data.faq_relevan || []; // FAQ relevan
                     this.memoryId = data.data.memory_id; // Simpan memory ID
 
                     this.tampilkanToast('Jawaban berhasil di-generate! ✨');

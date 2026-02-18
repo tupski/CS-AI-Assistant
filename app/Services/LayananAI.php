@@ -56,6 +56,9 @@ PROMPT;
             $this->provider->incrementQuota();
             $this->provider->resetError();
 
+            // Cari FAQ yang relevan
+            $response['faq_relevan'] = $this->cariFaqRelevan($pesanMember, $response['kategori'] ?? null);
+
             return $response;
         } catch (\Exception $e) {
             // Catat error
@@ -68,6 +71,68 @@ PROMPT;
 
             throw $e;
         }
+    }
+
+    /**
+     * Cari FAQ yang relevan dengan pertanyaan member
+     */
+    protected function cariFaqRelevan(string $pesanMember, ?string $kategori = null): array
+    {
+        $query = Faq::query();
+
+        // Filter by kategori jika ada
+        if ($kategori) {
+            $query->whereHas('kategori', function ($q) use ($kategori) {
+                $q->where('nama', 'like', "%{$kategori}%");
+            });
+        }
+
+        // Cari FAQ yang pertanyaannya mirip dengan pesan member
+        $keywords = $this->extractKeywords($pesanMember);
+
+        if (!empty($keywords)) {
+            $query->where(function ($q) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $q->orWhere('pertanyaan', 'like', "%{$keyword}%")
+                      ->orWhere('jawaban', 'like', "%{$keyword}%");
+                }
+            });
+        }
+
+        return $query->with('kategori')
+            ->limit(3)
+            ->get()
+            ->map(function ($faq) {
+                return [
+                    'id' => $faq->id,
+                    'pertanyaan' => $faq->pertanyaan,
+                    'jawaban' => $faq->jawaban,
+                    'kategori' => $faq->kategori->nama ?? 'Umum',
+                ];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Extract keywords dari pesan untuk search
+     */
+    protected function extractKeywords(string $text): array
+    {
+        // Lowercase dan hapus karakter khusus
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z0-9\s]/', ' ', $text);
+
+        // Split jadi kata-kata
+        $words = explode(' ', $text);
+
+        // Filter kata-kata pendek dan stopwords
+        $stopwords = ['yang', 'dan', 'di', 'ke', 'dari', 'untuk', 'pada', 'dengan', 'adalah', 'ini', 'itu', 'saya', 'anda', 'kamu', 'nya', 'ya', 'tidak', 'bisa', 'mau', 'dong', 'min', 'kak', 'bang'];
+
+        $keywords = array_filter($words, function ($word) use ($stopwords) {
+            return strlen($word) > 3 && !in_array($word, $stopwords);
+        });
+
+        return array_unique(array_values($keywords));
     }
 
     /**
