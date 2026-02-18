@@ -368,8 +368,8 @@ function faqManager() {
         },
 
         init() {
-            this.loadFaqs();
             this.handleHighlight();
+            this.loadFaqs();
         },
 
         handleHighlight() {
@@ -380,20 +380,20 @@ function faqManager() {
 
             if (highlight) {
                 this.filters.search = highlight;
+            }
 
-                // Jika ada ID, scroll ke FAQ tersebut setelah load
-                if (faqId) {
-                    setTimeout(() => {
-                        const element = document.getElementById(`faq-${faqId}`);
-                        if (element) {
-                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            element.classList.add('ring-2', 'ring-yellow-400');
-                            setTimeout(() => {
-                                element.classList.remove('ring-2', 'ring-yellow-400');
-                            }, 3000);
-                        }
-                    }, 500);
-                }
+            // Jika ada ID, scroll ke FAQ tersebut setelah load
+            if (faqId) {
+                setTimeout(() => {
+                    const element = document.getElementById(`faq-${faqId}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.classList.add('ring-2', 'ring-yellow-400');
+                        setTimeout(() => {
+                            element.classList.remove('ring-2', 'ring-yellow-400');
+                        }, 3000);
+                    }
+                }, 800);
             }
         },
 
