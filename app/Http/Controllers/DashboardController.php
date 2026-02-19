@@ -76,6 +76,8 @@ class DashboardController extends Controller
                     'formal' => $hasil['formal'],
                     'santai' => $hasil['santai'],
                     'singkat' => $hasil['singkat'],
+                    'informasi_relevan' => $hasil['informasi_relevan'] ?? [],
+                    'peraturan_relevan' => $hasil['peraturan_relevan'] ?? [],
                     'log_id' => $log->id,
                     'memory_id' => $memory->id,
                 ],

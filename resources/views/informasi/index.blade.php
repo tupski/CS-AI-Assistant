@@ -5,8 +5,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-white">Kelola FAQ</h1>
-            <p class="text-gray-400 mt-1">Manage frequently asked questions</p>
+            <h1 class="text-3xl font-bold text-white">Kelola Informasi Umum</h1>
+            <p class="text-gray-400 mt-1">Manage general information</p>
         </div>
         <div class="flex gap-2">
             <button @click="showUploadModal = true"
@@ -21,7 +21,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Tambah FAQ
+                Tambah Informasi
             </button>
         </div>
     </div>
@@ -39,17 +39,17 @@
     </div>
     @endif
 
-    <div x-data="faqManager()">
+    <div x-data="informasiManager()">
         <!-- Filter & Search -->
         <div class="bg-gray-800 rounded-lg p-4 mb-6">
             <div class="flex gap-4">
                 <div class="flex-1">
-                    <input type="text" x-model="filters.search" @input.debounce.500ms="loadFaqs()"
-                           placeholder="Cari FAQ..."
+                    <input type="text" x-model="filters.search" @input.debounce.500ms="loadInformasi()"
+                           placeholder="Cari info..."
                            class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="w-64">
-                    <select x-model="filters.kategori_id" @change="loadFaqs()"
+                    <select x-model="filters.kategori_id" @change="loadInformasi()"
                             class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Semua Kategori</option>
                         @foreach($kategoris as $kat)
@@ -70,10 +70,10 @@
         <!-- Loading State -->
         <div x-show="loading" class="text-center py-8">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p class="text-gray-400 mt-2">Memuat FAQ...</p>
+            <p class="text-gray-400 mt-2">Memuat info...</p>
         </div>
 
-        <!-- FAQ Table -->
+        <!-- info Table -->
         <div class="bg-gray-800 rounded-lg overflow-hidden" x-show="!loading">
             <table class="w-full">
                 <thead class="bg-gray-700">
@@ -85,54 +85,54 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    <template x-for="faq in faqs" :key="faq.id">
-                        <tr :id="`faq-${faq.id}`" class="hover:bg-gray-700/50 transition-all duration-300">
+                    <template x-for="info in informasi" :key="info.id">
+                        <tr :id="`info-${info.id}`" class="hover:bg-gray-700/50 transition-all duration-300">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <template x-if="faq.kategori">
+                                <template x-if="info.kategori">
                                     <span class="px-3 py-1 rounded-full text-xs font-medium shadow-lg"
-                                          :style="`background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${faq.kategori.warna}50; color: ${faq.kategori.warna}; border: 2px solid ${faq.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);`"
-                                          x-text="`${faq.kategori.icon} ${faq.kategori.nama}`">
+                                          :style="`background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${info.kategori.warna}50; color: ${info.kategori.warna}; border: 2px solid ${info.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);`"
+                                          x-text="`${info.kategori.icon} ${info.kategori.nama}`">
                                     </span>
                                 </template>
-                                <template x-if="!faq.kategori">
+                                <template x-if="!info.kategori">
                                     <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
                                         Tanpa Kategori
                                     </span>
                                 </template>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-white font-medium" x-text="faq.judul"></div>
+                                <div class="text-white font-medium" x-text="info.judul"></div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-gray-400 text-sm">
-                                    <span x-show="faq.isi.length <= 100" x-text="faq.isi"></span>
-                                    <span x-show="faq.isi.length > 100" x-text="faq.isi.substring(0, 100) + '...'"></span>
-                                    <button x-show="faq.isi.length > 100" @click="showDetail(faq)"
+                                    <span x-show="info.isi.length <= 100" x-text="info.isi"></span>
+                                    <span x-show="info.isi.length > 100" x-text="info.isi.substring(0, 100) + '...'"></span>
+                                    <button x-show="info.isi.length > 100" @click="showDetail(info)"
                                             class="text-blue-400 hover:text-blue-300 ml-2">
                                         Lihat Detail
                                     </button>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
-                                <button @click="salinIsi(faq.isi)"
+                                <button @click="salinIsi(info.isi)"
                                         class="text-green-400 hover:text-green-300">
                                     Salin
                                 </button>
-                                <button @click="editFaq(faq.id, faq.judul, faq.isi, faq.kategori_id)"
+                                <button @click="editInformasi(info.id, info.judul, info.isi, info.kategori_id)"
                                         class="text-blue-400 hover:text-blue-300">
                                     Edit
                                 </button>
-                                <button @click="hapusFaq(faq.id)"
+                                <button @click="hapusInformasi(info.id)"
                                         class="text-red-400 hover:text-red-300">
                                     Hapus
                                 </button>
                             </td>
                         </tr>
                     </template>
-                    <template x-if="faqs.length === 0">
+                    <template x-if="informasi.length === 0">
                         <tr>
                             <td colspan="4" class="px-6 py-8 text-center text-gray-400">
-                                Tidak ada FAQ. Klik "Tambah FAQ" untuk membuat yang baru.
+                                Tidak ada info. Klik "Tambah info" untuk membuat yang baru.
                             </td>
                         </tr>
                     </template>
@@ -140,14 +140,14 @@
             </table>
         </div>
 
-        <!-- Modal Detail FAQ -->
+        <!-- Modal Detail info -->
         <div x-show="showDetailModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div class="fixed inset-0 bg-black opacity-75" @click="showDetailModal = false"></div>
 
                 <div class="relative bg-gray-800 rounded-lg max-w-3xl w-full p-6">
                     <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-white" x-text="detailFaq.judul"></h3>
+                        <h3 class="text-xl font-bold text-white" x-text="detailInformasi.judul"></h3>
                         <button @click="showDetailModal = false" class="text-gray-400 hover:text-white">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -155,19 +155,19 @@
                         </button>
                     </div>
 
-                    <div class="mb-4" x-show="detailFaq.kategori">
+                    <div class="mb-4" x-show="detailInformasi.kategori">
                         <span class="px-3 py-1 rounded-full text-xs font-medium shadow-lg"
-                              :style="detailFaq.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${detailFaq.kategori.warna}50; color: ${detailFaq.kategori.warna}; border: 2px solid ${detailFaq.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
-                              x-text="detailFaq.kategori ? `${detailFaq.kategori.icon} ${detailFaq.kategori.nama}` : ''">
+                              :style="detailInformasi.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${detailInformasi.kategori.warna}50; color: ${detailInformasi.kategori.warna}; border: 2px solid ${detailInformasi.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
+                              x-text="detailInformasi.kategori ? `${detailInformasi.kategori.icon} ${detailInformasi.kategori.nama}` : ''">
                         </span>
                     </div>
 
                     <div class="bg-gray-700 rounded-lg p-4 mb-4 max-h-96 overflow-y-auto">
-                        <p class="text-gray-300 whitespace-pre-wrap" x-text="detailFaq.isi"></p>
+                        <p class="text-gray-300 whitespace-pre-wrap" x-text="detailInformasi.isi"></p>
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <button @click="salinIsi(detailFaq.isi)"
+                        <button @click="salinIsi(detailInformasi.isi)"
                                 class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
@@ -189,11 +189,11 @@
                 <div class="fixed inset-0 bg-black opacity-75" @click="showUploadModal = false"></div>
 
                 <div class="relative bg-gray-800 rounded-lg max-w-2xl w-full p-6">
-                    <h3 class="text-xl font-bold text-white mb-4">Upload FAQ dari Excel</h3>
+                    <h3 class="text-xl font-bold text-white mb-4">Upload info dari Excel</h3>
 
                     <!-- Download Template Button -->
                     <div class="mb-4">
-                        <a href="{{ route('faq.template') }}"
+                        <a href="{{ route('info.template') }}"
                            class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold shadow-lg transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -206,8 +206,8 @@
                         <h4 class="text-blue-300 font-semibold mb-2">📋 Format File:</h4>
                         <ul class="text-sm text-blue-200 space-y-1">
                             <li>• Kolom 1: <strong>kategori_id</strong> (ID kategori, opsional)</li>
-                            <li>• Kolom 2: <strong>judul</strong> (Pertanyaan FAQ)</li>
-                            <li>• Kolom 3: <strong>isi</strong> (Jawaban FAQ)</li>
+                            <li>• Kolom 2: <strong>judul</strong> (Pertanyaan info)</li>
+                            <li>• Kolom 3: <strong>isi</strong> (Jawaban info)</li>
                         </ul>
                     </div>
 
@@ -275,15 +275,15 @@
             </div>
         </div>
 
-        <!-- Modal Tambah/Edit FAQ -->
+        <!-- Modal Tambah/Edit info -->
         <div x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div class="fixed inset-0 bg-black opacity-75" @click="showModal = false"></div>
 
                 <div class="relative bg-gray-800 rounded-lg max-w-2xl w-full p-6">
-                    <h3 class="text-xl font-bold text-white mb-4" x-text="editMode ? 'Edit FAQ' : 'Tambah FAQ Baru'"></h3>
+                    <h3 class="text-xl font-bold text-white mb-4" x-text="editMode ? 'Edit info' : 'Tambah info Baru'"></h3>
 
-                    <form @submit.prevent="simpanFaq">
+                    <form @submit.prevent="simpanInformasi">
                         <div class="space-y-4">
                             <!-- Kategori -->
                             <div>
@@ -299,7 +299,7 @@
 
                             <!-- Judul -->
                             <div>
-                                <label class="block text-gray-300 mb-2">Judul FAQ <span class="text-red-400">*</span></label>
+                                <label class="block text-gray-300 mb-2">Judul info <span class="text-red-400">*</span></label>
                                 <input type="text" name="judul" x-model="formData.judul" required
                                        class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                        placeholder="Contoh: Bagaimana cara melakukan pembayaran?">
@@ -313,7 +313,7 @@
                                 <label class="block text-gray-300 mb-2">Isi Jawaban <span class="text-red-400">*</span></label>
                                 <textarea name="isi" x-model="formData.isi" required rows="6"
                                           class="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                          placeholder="Tulis jawaban lengkap untuk FAQ ini..."></textarea>
+                                          placeholder="Tulis jawaban lengkap untuk info ini..."></textarea>
                                 @error('isi')
                                 <p class="text-red-400 text-sm mt-1">{{ $message }}</p>
                                 @enderror
@@ -343,7 +343,7 @@
 </div>
 
 <script>
-function faqManager() {
+function informasiManager() {
     return {
         showModal: false,
         showDetailModal: false,
@@ -355,8 +355,8 @@ function faqManager() {
         uploadProgress: 0,
         selectedFile: null,
         isDragging: false,
-        faqs: [],
-        detailFaq: {},
+        informasi: [],
+        detailInformasi: {},
         filters: {
             search: '',
             kategori_id: ''
@@ -369,7 +369,7 @@ function faqManager() {
 
         init() {
             this.handleHighlight();
-            this.loadFaqs();
+            this.loadInformasi();
         },
 
         handleHighlight() {
@@ -382,10 +382,10 @@ function faqManager() {
                 this.filters.search = highlight;
             }
 
-            // Jika ada ID, scroll ke FAQ tersebut setelah load
+            // Jika ada ID, scroll ke info tersebut setelah load
             if (faqId) {
                 setTimeout(() => {
-                    const element = document.getElementById(`faq-${faqId}`);
+                    const element = document.getElementById(`info-${faqId}`);
                     if (element) {
                         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         element.classList.add('ring-2', 'ring-yellow-400');
@@ -397,7 +397,7 @@ function faqManager() {
             }
         },
 
-        async loadFaqs() {
+        async loadInformasi() {
             this.loading = true;
             try {
                 const params = new URLSearchParams();
@@ -405,14 +405,14 @@ function faqManager() {
                 if (this.filters.kategori_id) params.append('kategori_id', this.filters.kategori_id);
                 params.append('ajax', '1');
 
-                const response = await fetch(`{{ route('faq.index') }}?${params}`);
+                const response = await fetch(`{{ route('info.index') }}?${params}`);
                 const data = await response.json();
 
                 if (data.sukses) {
-                    this.faqs = data.data;
+                    this.informasi = data.data;
                 }
             } catch (error) {
-                console.error('Error loading FAQs:', error);
+                console.error('Error loading informasi:', error);
             } finally {
                 this.loading = false;
             }
@@ -423,21 +423,21 @@ function faqManager() {
                 search: '',
                 kategori_id: ''
             };
-            this.loadFaqs();
+            this.loadInformasi();
         },
 
-        showDetail(faq) {
-            this.detailFaq = faq;
+        showDetail(info) {
+            this.detailInformasi = info;
             this.showDetailModal = true;
         },
 
         async salinIsi(isi) {
             try {
                 await navigator.clipboard.writeText(isi);
-                showNotification('success', 'Berhasil!', 'Isi FAQ berhasil disalin');
+                showNotification('success', 'Berhasil!', 'Isi info berhasil disalin');
             } catch (error) {
                 console.error('Error copying:', error);
-                showNotification('error', 'Gagal!', 'Gagal menyalin isi FAQ');
+                showNotification('error', 'Gagal!', 'Gagal menyalin isi info');
             }
         },
 
@@ -449,7 +449,7 @@ function faqManager() {
             };
         },
 
-        editFaq(id, judul, isi, kategori_id) {
+        editInformasi(id, judul, isi, kategori_id) {
             this.editMode = true;
             this.editId = id;
             this.formData = {
@@ -460,11 +460,11 @@ function faqManager() {
             this.showModal = true;
         },
 
-        async simpanFaq() {
+        async simpanInformasi() {
             this.loading = true;
 
             try {
-                const url = this.editMode ? `/faq/${this.editId}` : '{{ route("faq.store") }}';
+                const url = this.editMode ? `/info/${this.editId}` : '{{ route("info.store") }}';
                 const method = this.editMode ? 'PUT' : 'POST';
 
                 const response = await fetch(url, {
@@ -480,27 +480,27 @@ function faqManager() {
                 const data = await response.json();
 
                 if (data.sukses) {
-                    showNotification('success', 'Berhasil!', data.pesan || 'FAQ berhasil disimpan');
+                    showNotification('success', 'Berhasil!', data.pesan || 'info berhasil disimpan');
                     this.showModal = false;
                     this.resetForm();
-                    this.loadFaqs();
+                    this.loadInformasi();
                 } else {
-                    showNotification('error', 'Gagal!', data.pesan || 'Gagal menyimpan FAQ');
+                    showNotification('error', 'Gagal!', data.pesan || 'Gagal menyimpan info');
                 }
             } catch (error) {
-                console.error('Error saving FAQ:', error);
-                showNotification('error', 'Error!', 'Terjadi kesalahan saat menyimpan FAQ');
+                console.error('Error saving info:', error);
+                showNotification('error', 'Error!', 'Terjadi kesalahan saat menyimpan info');
             } finally {
                 this.loading = false;
             }
         },
 
-        async hapusFaq(id) {
-            const result = await showConfirm('Hapus FAQ?', 'FAQ yang dihapus tidak dapat dikembalikan');
+        async hapusInformasi(id) {
+            const result = await showConfirm('Hapus info?', 'info yang dihapus tidak dapat dikembalikan');
             if (!result.isConfirmed) return;
 
             try {
-                const response = await fetch(`/faq/${id}`, {
+                const response = await fetch(`/info/${id}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -511,14 +511,14 @@ function faqManager() {
                 const data = await response.json();
 
                 if (data.sukses) {
-                    showNotification('success', 'Berhasil!', 'FAQ berhasil dihapus');
-                    this.loadFaqs();
+                    showNotification('success', 'Berhasil!', 'info berhasil dihapus');
+                    this.loadInformasi();
                 } else {
-                    showNotification('error', 'Gagal!', data.pesan || 'Gagal menghapus FAQ');
+                    showNotification('error', 'Gagal!', data.pesan || 'Gagal menghapus info');
                 }
             } catch (error) {
-                console.error('Error deleting FAQ:', error);
-                showNotification('error', 'Error!', 'Terjadi kesalahan saat menghapus FAQ');
+                console.error('Error deleting info:', error);
+                showNotification('error', 'Error!', 'Terjadi kesalahan saat menghapus info');
             }
         },
 
@@ -562,11 +562,11 @@ function faqManager() {
                     if (xhr.status === 200) {
                         const data = JSON.parse(xhr.responseText);
                         if (data.sukses) {
-                            showNotification('success', 'Berhasil!', `Berhasil import ${data.imported} FAQ`);
+                            showNotification('success', 'Berhasil!', `Berhasil import ${data.imported} info`);
                             this.showUploadModal = false;
                             this.selectedFile = null;
                             this.uploadProgress = 0;
-                            this.loadFaqs();
+                            this.loadInformasi();
                         } else {
                             showNotification('error', 'Gagal!', data.pesan || 'Gagal upload file');
                         }
@@ -581,7 +581,7 @@ function faqManager() {
                     this.uploading = false;
                 });
 
-                xhr.open('POST', '{{ route("faq.import") }}');
+                xhr.open('POST', '{{ route("info.import") }}');
                 xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
                 xhr.send(formData);
             } catch (error) {
@@ -604,4 +604,5 @@ function faqManager() {
 }
 </style>
 @endsection
+
 

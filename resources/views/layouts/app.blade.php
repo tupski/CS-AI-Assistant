@@ -89,7 +89,7 @@
                             <!-- Knowledge Base Dropdown (Admin & Supervisor) -->
                             @if(Auth::user()->isAdmin() || Auth::user()->isSupervisor())
                             <div class="relative" @mouseenter="openDropdown = 'knowledge'" @mouseleave="openDropdown = null">
-                                <button class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center {{ request()->routeIs('faq*') || request()->routeIs('peraturan*') || request()->routeIs('kategori*') ? 'bg-gray-700 text-white' : '' }}">
+                                <button class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center {{ request()->routeIs('informasi*') || request()->routeIs('peraturan*') || request()->routeIs('kategori*') ? 'bg-gray-700 text-white' : '' }}">
                                     Knowledge Base
                                     <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -98,8 +98,8 @@
                                 <div x-show="openDropdown === 'knowledge'"
                                      x-transition
                                      class="absolute left-0 mt-1 w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-50">
-                                    <a href="{{ route('faq.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('faq*') ? 'bg-gray-700 text-white' : '' }}">
-                                        📋 FAQ
+                                    <a href="{{ route('informasi.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('informasi*') ? 'bg-gray-700 text-white' : '' }}">
+                                        📋 Informasi Umum
                                     </a>
                                     <a href="{{ route('peraturan.index') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('peraturan*') ? 'bg-gray-700 text-white' : '' }}">
                                         📜 Peraturan

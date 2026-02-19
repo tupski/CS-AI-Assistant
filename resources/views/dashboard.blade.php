@@ -77,7 +77,7 @@
     </div>
     @endif
 
-    <!-- Quick Search FAQ -->
+    <!-- Quick Search Informasi -->
     <div class="mb-4 md:mb-6 bg-gray-800 rounded-lg border border-gray-700 p-4" x-data="{ searchQuery: '', searchResults: [], searching: false }">
         <div class="flex items-center gap-3">
             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,8 +85,8 @@
             </svg>
             <input type="text"
                    x-model="searchQuery"
-                   @input.debounce.300ms="searchFAQ()"
-                   placeholder="Cari di FAQ... (ketik minimal 3 karakter)"
+                   @input.debounce.300ms="searchInformasi()"
+                   placeholder="Cari di Informasi Umum... (ketik minimal 3 karakter)"
                    class="flex-1 bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <svg x-show="searching" class="animate-spin h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -97,7 +97,7 @@
         <!-- Search Results -->
         <div x-show="searchResults.length > 0" class="mt-3 space-y-2 max-h-60 overflow-y-auto">
             <template x-for="result in searchResults" :key="result.id">
-                <a :href="`/faq?highlight=${encodeURIComponent(searchQuery)}&id=${result.id}`"
+                <a :href="`/informasi?highlight=${encodeURIComponent(searchQuery)}&id=${result.id}`"
                    class="block bg-gray-700/50 hover:bg-gray-700 rounded-lg p-3 transition-colors border border-gray-600 hover:border-blue-500">
                     <div class="flex items-start justify-between gap-2">
                         <div class="flex-1 min-w-0">
@@ -351,34 +351,34 @@
                 </div>
             </div>
 
-            <!-- FAQ Relevan Section -->
-            <div x-show="faqRelevan.length > 0" x-transition class="mt-4 md:mt-6">
+            <!-- Informasi Relevan Section -->
+            <div x-show="informasiRelevan.length > 0" x-transition class="mt-4 md:mt-6">
                 <div class="bg-purple-900/30 border border-purple-700 rounded-lg p-3 md:p-5">
                     <h3 class="text-base md:text-lg font-semibold text-purple-300 mb-2 md:mb-3 flex items-center">
                         <svg class="h-4 w-4 md:h-5 md:w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        FAQ Relevan
+                        Informasi Relevan
                     </h3>
-                    <p class="text-xs md:text-sm text-purple-200 mb-3 md:mb-4">Referensi FAQ yang mungkin sesuai dengan pertanyaan member:</p>
+                    <p class="text-xs md:text-sm text-purple-200 mb-3 md:mb-4">Referensi Informasi Umum yang mungkin sesuai dengan pertanyaan member:</p>
 
                     <div class="space-y-2 md:space-y-3">
-                        <template x-for="(faq, index) in faqRelevan" :key="index">
+                        <template x-for="(info, index) in informasiRelevan" :key="index">
                             <div class="bg-gray-800 rounded-lg p-3 md:p-4 border border-purple-700/50" x-data="{ expanded: false }">
                                 <div class="flex items-start justify-between mb-2">
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2 mb-1.5 md:mb-2">
-                                            <span x-show="faq.kategori"
+                                            <span x-show="info.kategori"
                                                   class="inline-block px-2 py-0.5 md:py-1 text-xs rounded-full shadow-lg"
-                                                  :style="faq.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${faq.kategori.warna}50; color: ${faq.kategori.warna}; border: 2px solid ${faq.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
-                                                  x-text="faq.kategori ? `${faq.kategori.icon} ${faq.kategori.nama}` : ''">
+                                                  :style="info.kategori ? `background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), ${info.kategori.warna}50; color: ${info.kategori.warna}; border: 2px solid ${info.kategori.warna}; text-shadow: 0 1px 2px rgba(0,0,0,0.8);` : ''"
+                                                  x-text="info.kategori ? `${info.kategori.icon} ${info.kategori.nama}` : ''">
                                             </span>
                                         </div>
                                         <h4 class="text-sm md:text-base font-semibold text-white mb-1.5 md:mb-2 flex items-start">
                                             <svg class="h-3.5 w-3.5 md:h-4 md:w-4 mr-1 mt-0.5 text-purple-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            <span class="break-words" x-text="faq.pertanyaan"></span>
+                                            <span class="break-words" x-text="info.pertanyaan"></span>
                                         </h4>
                                     </div>
                                     <button
@@ -395,11 +395,11 @@
                                 </div>
                                 <div x-show="expanded" x-collapse>
                                     <div class="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-purple-700/30">
-                                        <p class="text-xs md:text-sm text-gray-300 whitespace-pre-wrap break-words" x-text="faq.jawaban"></p>
+                                        <p class="text-xs md:text-sm text-gray-300 whitespace-pre-wrap break-words" x-text="info.jawaban"></p>
                                     </div>
                                 </div>
                                 <div x-show="!expanded">
-                                    <p class="text-xs md:text-sm text-gray-400 line-clamp-2 break-words" x-text="faq.jawaban"></p>
+                                    <p class="text-xs md:text-sm text-gray-400 line-clamp-2 break-words" x-text="info.jawaban"></p>
                                 </div>
                             </div>
                         </template>
@@ -488,7 +488,7 @@ function dashboardApp() {
         jawabanFormal: '',
         jawabanSantai: '',
         jawabanSingkat: '',
-        faqRelevan: [], // FAQ yang relevan dengan pertanyaan
+        informasiRelevan: [], // Informasi yang relevan dengan pertanyaan
         peraturanRelevan: [], // Peraturan yang relevan dengan pertanyaan
         loading: false,
         loadingRegenerate: null,
@@ -536,7 +536,7 @@ function dashboardApp() {
                     this.jawabanFormal = data.data.formal;
                     this.jawabanSantai = data.data.santai;
                     this.jawabanSingkat = data.data.singkat;
-                    this.faqRelevan = data.data.faq_relevan || []; // FAQ relevan
+                    this.informasiRelevan = data.data.informasi_relevan || []; // Informasi relevan
                     this.peraturanRelevan = data.data.peraturan_relevan || []; // Peraturan relevan
                     this.memoryId = data.data.memory_id; // Simpan memory ID
 
@@ -676,7 +676,7 @@ function dashboardApp() {
             }, 3000);
         },
 
-        async searchFAQ() {
+        async searchInformasi() {
             if (this.searchQuery.length < 3) {
                 this.searchResults = [];
                 return;
@@ -684,13 +684,13 @@ function dashboardApp() {
 
             this.searching = true;
             try {
-                const response = await fetch(`/faq?ajax=1&search=${encodeURIComponent(this.searchQuery)}`);
+                const response = await fetch(`/informasi?ajax=1&search=${encodeURIComponent(this.searchQuery)}`);
                 const data = await response.json();
                 if (data.sukses) {
                     this.searchResults = data.data;
                 }
             } catch (error) {
-                console.error('Error searching FAQ:', error);
+                console.error('Error searching Informasi:', error);
             } finally {
                 this.searching = false;
             }
