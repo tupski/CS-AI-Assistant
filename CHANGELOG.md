@@ -5,6 +5,49 @@ Semua perubahan penting pada project CS AI Assistant akan didokumentasikan di fi
 Format berdasarkan [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 dan project ini mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-02-19
+
+### 🔄 Perubahan Major - Rename FAQ menjadi Informasi Umum
+
+#### Database
+- **Migration**: Rename tabel `faq` menjadi `informasi`
+- Semua data existing tetap terjaga
+
+#### Backend
+- **Model**: Rename `Faq.php` menjadi `Informasi.php`
+- **Controller**: Rename `FaqController.php` menjadi `InformasiController.php`
+- **Seeder**: Rename `FaqSeeder.php` menjadi `InformasiSeeder.php`
+- **Routes**: Update semua route dari `/faq` menjadi `/informasi`
+- **Service LayananAI**:
+  - Rename method `cariFaqRelevan()` menjadi `cariInformasiRelevan()`
+  - Rename method `formatFaq()` menjadi `formatInformasi()`
+  - Update system prompt dari "FAQ KNOWLEDGE BASE" menjadi "INFORMASI UMUM KNOWLEDGE BASE"
+  - Update semua variable dari `$faqs` menjadi `$informasi`
+
+#### Frontend
+- **View Folder**: Rename `resources/views/faq` menjadi `resources/views/informasi`
+- **Dashboard**:
+  - "Quick Search FAQ" → "Quick Search Informasi"
+  - "FAQ Relevan" → "Informasi Relevan"
+  - Update function `searchFAQ()` → `searchInformasi()`
+  - Update variable `faqRelevan` → `informasiRelevan`
+  - Update route `/faq` → `/informasi`
+- **Informasi Index Page**:
+  - "Kelola FAQ" → "Kelola Informasi Umum"
+  - "Tambah FAQ" → "Tambah Informasi"
+  - Update semua function names: `faqManager()` → `informasiManager()`, `loadFaqs()` → `loadInformasi()`, dll
+  - Update semua text labels dan placeholder
+- **Navigation Menu**:
+  - "📋 FAQ" → "📋 Informasi Umum"
+  - Update route reference di Knowledge Base dropdown
+
+#### API Response
+- **DashboardController**: Update response key dari `faq_relevan` menjadi `informasi_relevan`
+
+### 🐛 Bug Fixes
+- Fix error "Call to undefined relationship [kategori]" di LayananAI
+- Update eager loading dari `Faq::with('kategori')` menjadi `Informasi::with('kategoriRelasi')`
+
 ## [2.4.0] - 2026-02-18
 
 ### ✨ Fitur Baru - Multi-Provider AI System
