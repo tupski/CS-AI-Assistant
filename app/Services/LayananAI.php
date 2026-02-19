@@ -389,7 +389,7 @@ PROMPT;
         $peraturanText = $this->formatPeraturan($peraturans);
 
         // Ambil FAQ yang relevan
-        $faqs = Faq::with('kategori')->limit(10)->get();
+        $faqs = Faq::with('kategoriRelasi')->limit(10)->get();
         $faqText = $this->formatFaq($faqs);
 
         // Ambil AI Memory user sendiri (prioritas tinggi - yang pernah disalin)
