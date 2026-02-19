@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\AiMemory;
 use App\Models\AiProvider;
-use App\Models\Faq;
+use App\Models\Informasi;
 use App\Models\LogChat;
 use App\Models\Pengaturan;
 use App\Models\Peraturan;
@@ -56,8 +56,8 @@ PROMPT;
             $this->provider->incrementQuota();
             $this->provider->resetError();
 
-            // Cari FAQ dan Peraturan yang relevan
-            $response['faq_relevan'] = $this->cariFaqRelevan($pesanMember, $response['kategori'] ?? null);
+            // Cari Informasi dan Peraturan yang relevan
+            $response['informasi_relevan'] = $this->cariInformasiRelevan($pesanMember, $response['kategori'] ?? null);
             $response['peraturan_relevan'] = $this->cariPeraturanRelevan($pesanMember, $response['kategori'] ?? null);
 
             return $response;
@@ -75,11 +75,11 @@ PROMPT;
     }
 
     /**
-     * Cari FAQ yang relevan dengan pertanyaan member
+     * Cari Informasi yang relevan dengan pertanyaan member
      */
-    protected function cariFaqRelevan(string $pesanMember, ?string $kategori = null): array
+    protected function cariInformasiRelevan(string $pesanMember, ?string $kategori = null): array
     {
-        $query = Faq::query();
+        $query = Informasi::query();
 
         // Filter by kategori jika ada
         if ($kategori) {
@@ -88,7 +88,7 @@ PROMPT;
             });
         }
 
-        // Cari FAQ yang judulnya atau isinya mirip dengan pesan member
+        // Cari Informasi yang judulnya atau isinya mirip dengan pesan member
         $keywords = $this->extractKeywords($pesanMember);
 
         if (!empty($keywords)) {
@@ -103,13 +103,13 @@ PROMPT;
         return $query->with('kategoriRelasi')
             ->limit(3)
             ->get()
-            ->map(function ($faq) {
-                $kategoriData = $faq->kategoriRelasi;
+            ->map(function ($info) {
+                $kategoriData = $info->kategoriRelasi;
 
                 return [
-                    'id' => $faq->id,
-                    'pertanyaan' => $faq->judul,
-                    'jawaban' => $faq->isi,
+                    'id' => $info->id,
+                    'pertanyaan' => $info->judul,
+                    'jawaban' => $info->isi,
                     'kategori' => $kategoriData ? [
                         'nama' => $kategoriData->nama,
                         'warna' => $kategoriData->warna,
@@ -388,9 +388,9 @@ PROMPT;
         $peraturans = Peraturan::aktif()->urutan()->get();
         $peraturanText = $this->formatPeraturan($peraturans);
 
-        // Ambil FAQ yang relevan
-        $faqs = Faq::with('kategoriRelasi')->limit(10)->get();
-        $faqText = $this->formatFaq($faqs);
+        // Ambil Informasi Umum yang relevan
+        $informasi = Informasi::with('kategoriRelasi')->limit(10)->get();
+        $informasiText = $this->formatInformasi($informasi);
 
         // Ambil AI Memory user sendiri (prioritas tinggi - yang pernah disalin)
         $userMemories = collect();
@@ -441,8 +441,8 @@ ATURAN PENTING:
 PERATURAN & GUIDELINES CS:
 {$peraturanText}
 
-FAQ KNOWLEDGE BASE:
-{$faqText}
+INFORMASI UMUM KNOWLEDGE BASE:
+{$informasiText}
 
 CONTOH JAWABAN TERBAIK ANDA (Memory Pribadi - pelajari dari jawaban yang pernah Anda salin):
 {$userMemoryText}
@@ -502,24 +502,24 @@ PROMPT;
     }
 
     /**
-     * Format FAQ untuk system prompt
+     * Format Informasi Umum untuk system prompt
      */
-    protected function formatFaq($faqs): string
+    protected function formatInformasi($informasi): string
     {
-        if ($faqs->isEmpty()) {
-            return "Belum ada FAQ tersedia.";
+        if ($informasi->isEmpty()) {
+            return "Belum ada Informasi Umum tersedia.";
         }
 
         $text = "";
-        foreach ($faqs as $index => $faq) {
+        foreach ($informasi as $index => $info) {
             $num = $index + 1;
             $kategori = '';
-            if ($faq->kategori && is_object($faq->kategori)) {
-                $kategori = " [{$faq->kategori->nama}]";
+            if ($info->kategori && is_object($info->kategori)) {
+                $kategori = " [{$info->kategori->nama}]";
             }
-            $text .= "\nFAQ {$num}{$kategori}:\n";
-            $text .= "Q: {$faq->judul}\n";
-            $text .= "A: " . substr($faq->isi, 0, 300) . "\n";
+            $text .= "\nINFORMASI {$num}{$kategori}:\n";
+            $text .= "Q: {$info->judul}\n";
+            $text .= "A: " . substr($info->isi, 0, 300) . "\n";
         }
 
         return $text;
@@ -582,9 +582,9 @@ PROMPT;
      */
     public function saveToMemory(string $pesanMember, array $hasil, int $userId, bool $isGoodExample = false): AiMemory
     {
-        // Snapshot peraturan dan FAQ saat ini
+        // Snapshot peraturan dan Informasi Umum saat ini
         $peraturans = Peraturan::aktif()->urutan()->get();
-        $faqs = Faq::limit(10)->get();
+        $informasi = Informasi::limit(10)->get();
 
         $memory = AiMemory::create([
             'user_id' => $userId,
@@ -595,7 +595,7 @@ PROMPT;
             'jawaban_singkat' => $hasil['singkat'],
             'is_good_example' => $isGoodExample,
             'snapshot_peraturan' => $peraturans->toJson(),
-            'snapshot_faq' => $faqs->toJson(),
+            'snapshot_faq' => $informasi->toJson(),
             'system_prompt_used' => $this->buatSystemPrompt(),
         ]);
 

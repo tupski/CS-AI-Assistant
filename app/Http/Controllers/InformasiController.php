@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Faq;
+use App\Models\Informasi;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
 
-class FaqController extends Controller
+class InformasiController extends Controller
 {
     /**
-     * Tampilkan daftar FAQ
+     * Tampilkan daftar Informasi Umum
      */
     public function index(Request $request)
     {
-        $query = Faq::with('kategoriRelasi');
+        $query = Informasi::with('kategoriRelasi');
 
         // Filter berdasarkan kategori jika ada
         if ($request->filled('kategori_id')) {
@@ -29,26 +29,26 @@ class FaqController extends Controller
             });
         }
 
-        $faqs = $query->latest()->get();
+        $informasi = $query->latest()->get();
         $kategoris = Kategori::aktif()->urutan()->get();
 
         // Jika request AJAX, return JSON
         if ($request->ajax() || $request->has('ajax')) {
             // Transform data untuk frontend
-            $data = $faqs->map(function ($faq) {
+            $data = $informasi->map(function ($info) {
                 return [
-                    'id' => $faq->id,
-                    'judul' => $faq->judul,
-                    'isi' => $faq->isi,
-                    'kategori_id' => $faq->kategori_id,
-                    'kategori' => $faq->kategoriRelasi ? [
-                        'id' => $faq->kategoriRelasi->id,
-                        'nama' => $faq->kategoriRelasi->nama,
-                        'warna' => $faq->kategoriRelasi->warna,
-                        'icon' => $faq->kategoriRelasi->icon,
+                    'id' => $info->id,
+                    'judul' => $info->judul,
+                    'isi' => $info->isi,
+                    'kategori_id' => $info->kategori_id,
+                    'kategori' => $info->kategoriRelasi ? [
+                        'id' => $info->kategoriRelasi->id,
+                        'nama' => $info->kategoriRelasi->nama,
+                        'warna' => $info->kategoriRelasi->warna,
+                        'icon' => $info->kategoriRelasi->icon,
                     ] : null,
-                    'created_at' => $faq->created_at,
-                    'updated_at' => $faq->updated_at,
+                    'created_at' => $info->created_at,
+                    'updated_at' => $info->updated_at,
                 ];
             });
 
@@ -58,11 +58,11 @@ class FaqController extends Controller
             ]);
         }
 
-        return view('faq.index', compact('faqs', 'kategoris'));
+        return view('informasi.index', compact('informasi', 'kategoris'));
     }
 
     /**
-     * Simpan FAQ baru
+     * Simpan Informasi baru
      */
     public function store(Request $request)
     {
@@ -71,8 +71,8 @@ class FaqController extends Controller
             'judul' => 'required|string|max:255',
             'isi' => 'required|string',
         ], [
-            'judul.required' => 'Judul FAQ wajib diisi',
-            'isi.required' => 'Isi FAQ wajib diisi',
+            'judul.required' => 'Judul Informasi wajib diisi',
+            'isi.required' => 'Isi Informasi wajib diisi',
             'kategori_id.exists' => 'Kategori tidak valid',
         ]);
 
@@ -82,33 +82,33 @@ class FaqController extends Controller
             $validated['kategori'] = $kategori->nama;
         }
 
-        $faq = Faq::create($validated);
+        $informasi = Informasi::create($validated);
 
         // Jika request AJAX, return JSON
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'sukses' => true,
-                'pesan' => 'FAQ berhasil ditambahkan',
-                'data' => $faq->load('kategoriRelasi')
+                'pesan' => 'Informasi berhasil ditambahkan',
+                'data' => $informasi->load('kategoriRelasi')
             ]);
         }
 
-        return redirect()->route('faq.index')
-            ->with('success', 'FAQ berhasil ditambahkan');
+        return redirect()->route('informasi.index')
+            ->with('success', 'Informasi berhasil ditambahkan');
     }
 
     /**
-     * Update FAQ
+     * Update Informasi
      */
-    public function update(Request $request, Faq $faq)
+    public function update(Request $request, Informasi $informasi)
     {
         $validated = $request->validate([
             'kategori_id' => 'nullable|exists:kategori,id',
             'judul' => 'required|string|max:255',
             'isi' => 'required|string',
         ], [
-            'judul.required' => 'Judul FAQ wajib diisi',
-            'isi.required' => 'Isi FAQ wajib diisi',
+            'judul.required' => 'Judul Informasi wajib diisi',
+            'isi.required' => 'Isi Informasi wajib diisi',
             'kategori_id.exists' => 'Kategori tidak valid',
         ]);
 
@@ -120,38 +120,38 @@ class FaqController extends Controller
             $validated['kategori'] = null;
         }
 
-        $faq->update($validated);
+        $informasi->update($validated);
 
         // Jika request AJAX, return JSON
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'sukses' => true,
-                'pesan' => 'FAQ berhasil diupdate',
-                'data' => $faq->load('kategoriRelasi')
+                'pesan' => 'Informasi berhasil diupdate',
+                'data' => $informasi->load('kategoriRelasi')
             ]);
         }
 
-        return redirect()->route('faq.index')
-            ->with('success', 'FAQ berhasil diupdate');
+        return redirect()->route('informasi.index')
+            ->with('success', 'Informasi berhasil diupdate');
     }
 
     /**
-     * Hapus FAQ
+     * Hapus Informasi
      */
-    public function destroy(Request $request, Faq $faq)
+    public function destroy(Request $request, Informasi $informasi)
     {
-        $faq->delete();
+        $informasi->delete();
 
         // Jika request AJAX, return JSON
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'sukses' => true,
-                'pesan' => 'FAQ berhasil dihapus'
+                'pesan' => 'Informasi berhasil dihapus'
             ]);
         }
 
-        return redirect()->route('faq.index')
-            ->with('success', 'FAQ berhasil dihapus');
+        return redirect()->route('informasi.index')
+            ->with('success', 'Informasi berhasil dihapus');
     }
 
     /**
@@ -159,7 +159,7 @@ class FaqController extends Controller
      */
     public function template()
     {
-        $filename = 'template_faq.csv';
+        $filename = 'template_informasi.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -179,7 +179,7 @@ class FaqController extends Controller
     }
 
     /**
-     * Import FAQ dari Excel/CSV
+     * Import Informasi dari Excel/CSV
      */
     public function import(Request $request)
     {
@@ -219,7 +219,7 @@ class FaqController extends Controller
                                 }
                             }
 
-                            Faq::create($data);
+                            Informasi::create($data);
                             $imported++;
                         }
                     }
@@ -230,7 +230,7 @@ class FaqController extends Controller
             return response()->json([
                 'sukses' => true,
                 'imported' => $imported,
-                'pesan' => "Berhasil import $imported FAQ"
+                'pesan' => "Berhasil import $imported Informasi"
             ]);
 
         } catch (\Exception $e) {
@@ -241,3 +241,4 @@ class FaqController extends Controller
         }
     }
 }
+

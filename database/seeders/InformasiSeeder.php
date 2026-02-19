@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Faq;
+use App\Models\Informasi;
 use Illuminate\Database\Seeder;
 
-class FaqSeeder extends Seeder
+class InformasiSeeder extends Seeder
 {
     /**
-     * Seed data FAQ untuk referensi AI
+     * Seed data Informasi Umum untuk referensi AI
      */
     public function run(): void
     {
-        $faqs = [
+        $informasi = [
             [
                 'kategori' => 'pembayaran',
                 'judul' => 'Metode Pembayaran',
@@ -55,10 +55,11 @@ class FaqSeeder extends Seeder
             ],
         ];
 
-        foreach ($faqs as $faq) {
-            Faq::create($faq);
+        foreach ($informasi as $info) {
+            Informasi::create($info);
         }
 
-        $this->command->info('FAQ berhasil di-seed!');
+        $this->command->info('Informasi Umum berhasil di-seed!');
     }
 }
+

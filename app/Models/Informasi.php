@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Faq extends Model
+class Informasi extends Model
 {
     /**
      * Nama tabel di database
      */
-    protected $table = 'faq';
+    protected $table = 'informasi';
 
     /**
      * Field yang boleh diisi mass assignment
@@ -54,3 +54,4 @@ class Faq extends Model
         return $value;
     }
 }
+

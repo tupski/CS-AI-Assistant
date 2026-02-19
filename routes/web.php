@@ -3,7 +3,7 @@
 use App\Http\Controllers\AiProviderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FaqController;
+use App\Http\Controllers\InformasiController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PeraturanController;
@@ -29,11 +29,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/track-copy', [DashboardController::class, 'trackCopy'])->name('dashboard.track-copy');
     Route::get('/dashboard/riwayat', [DashboardController::class, 'riwayat'])->name('dashboard.riwayat');
 
-    // Route FAQ (admin & supervisor)
+    // Route Informasi Umum (admin & supervisor)
     Route::middleware('role:admin,supervisor')->group(function () {
-        Route::get('/faq/template', [FaqController::class, 'template'])->name('faq.template');
-        Route::post('/faq/import', [FaqController::class, 'import'])->name('faq.import');
-        Route::resource('faq', FaqController::class)->except(['show', 'create', 'edit']);
+        Route::get('/informasi/template', [InformasiController::class, 'template'])->name('informasi.template');
+        Route::post('/informasi/import', [InformasiController::class, 'import'])->name('informasi.import');
+        Route::resource('informasi', InformasiController::class)->except(['show', 'create', 'edit']);
     });
 
     // Route Kategori (hanya admin)
